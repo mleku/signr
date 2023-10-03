@@ -1,7 +1,7 @@
 # signr
 
 Designed along similar lines to `ssh-keygen` but with a more singular purpose,
-`signostr` can generate new keys, keeping them in a directory with a familiar
+`signr` can generate new keys, keeping them in a directory with a familiar
 similar layout as `.ssh`, as well as sign and verify.
 
 It provides the following functionality:
