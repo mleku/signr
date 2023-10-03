@@ -1,4 +1,4 @@
-# signostr
+# signr
 
 Designed along similar lines to `ssh-keygen` but with a more singular purpose,
 `signostr` can generate new keys, keeping them in a directory with a familiar
@@ -30,7 +30,7 @@ of the same hash functions and elliptic curves.
 
 The raw bytes that are hashed using SHA256 are constructed as follows:
 
-1. Magic - the string `signostr`. Sometimes referred to as a "namespace".
+1. Magic - the string `signr`. Sometimes referred to as a "namespace".
 2. Version - Monotonic number as a string encoding the version being used.
    Starts with 0.
 3. The hash function used, `SHA256` normally but allowing future additions,
@@ -57,7 +57,7 @@ Each section is separated by a underscore, so the whole string is selected
 
 The canonical encoding of the signature prefix would thus look like this:
 
-   signostr_0_SHA256_ECDSA_deadbeefcafeb00b_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+   signr_0_SHA256_ECDSA_deadbeefcafeb00b_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
 The signature will then be in Bech32, and appended in place of the 
 hexadecimal hash string as shown above, and the verifier must first generate 
