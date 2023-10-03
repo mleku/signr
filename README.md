@@ -33,10 +33,10 @@ The raw bytes that are hashed using SHA256 are constructed as follows:
    Starts with 0.
 3. The hash function used, `SHA256` normally but allowing future additions,
    This is also part of the signature prefix.
-4. Nonce - a strong random value of 64 bits as 16
+4. Nonce - a strong random value of 64 bits as 16 hex
    characters, that are repeated in the signature prefix to enable the
    generation of the actual message hash that is signed
-5. Hash of the message being signed in Bech32
+5. Hash of the message being signed in hex
 
 The string is interpreted as standard ASCII, and the hash that is signed is
 generated from these ASCII bytes.
