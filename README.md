@@ -18,7 +18,7 @@ It provides the following functionality:
 - [ ] Signing - using a distinct protocol to keep the signature space
   isolated from other protocols, such as Bitcoin message signatures. The 
   signature algorithm, however, will be the standard ECDSA as used in 
-  Bitcoin as this compactly includes the publdc key
+  Bitcoin as this compactly includes the public key
 
 - [ ] Verification - checking that a signature matches a given file or hash on
   a file
