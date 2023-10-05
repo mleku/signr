@@ -27,7 +27,7 @@ pairs of public and private keys.`,
 		}
 		secBytes := sec.Serialize()
 		pubBytes := schnorr.SerializePubKey(pub)
-		fmt.Printf("hex:\n\tsecret: 0x%s\n\tpublic: 0x%s\n",
+		fmt.Printf("hex:\n\tsecret: %s\n\tpublic: %s\n",
 			hex.EncodeToString(secBytes),
 			hex.EncodeToString(pubBytes),
 		)

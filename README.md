@@ -14,8 +14,8 @@ It provides the following functionality:
 
 - Secret key import 
 
-    - [ ] hexadecimal
-    - [ ] nsec
+    - [x] hexadecimal
+    - [x] nsec
     - [ ] BIP39 word-keys
 
 - [ ] Signing - using a distinct protocol to keep the signature space

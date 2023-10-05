@@ -15,7 +15,7 @@ import (
 
 // importCmd represents the import command
 var importCmd = &cobra.Command{
-	Use:   "import <secret key>",
+	Use:   "import <secret key> <name>",
 	Short: "Import a secret key",
 	Long: `Import a secret key provided in hexadecimal, nostr nsec or bip39 word key formats. 
 
@@ -23,27 +23,42 @@ Each format has a distinctive prefix that enables them to be automatically recog
 
 Commonly hexadecimal format nostr keys are not prefixed correctly with '0x' so be aware this is required or it will be rejected.
 
-Word keys will be tried in english first and then all the other languages if the key does not start with 'nsec' or '0x'`,
+Word keys will be tried in english first and then all the other languages if the key does not start with 'nsec' or '0x'
+
+When importing a word key, there must be 25 words, the last word is the name used to refer to the key.
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		argLen := len(args)
-		if argLen < 1 {
-			_, _ = fmt.Fprintf(os.Stderr, "a secret key is required")
+		if argLen == 1 {
+			_, _ = fmt.Fprintln(os.Stderr,
+				"a key name is required after the secret key")
+			os.Exit(1)
 		}
-		fmt.Println(len(args), args)
+		if argLen == 24 {
+			_, _ = fmt.Fprintln(os.Stderr,
+				"a key name is required after the 24 words of the bip39 word key")
+			os.Exit(1)
+		}
 		var sec *secp.SecretKey
 		var err error
 		switch {
-		case argLen == 24:
-			secBytes := bip39.MnemonicToSeed(strings.Join(args, " "), "")
+		case argLen == 25:
+			fmt.Println(len(args), args[:24])
+			secBytes := bip39.MnemonicToSeed(strings.Join(args[:24], " "), "")
 			fmt.Printf("hex:\n\tsecret: 0x%s\n\tpublic: 0x%s\n",
 				hex.EncodeToString(secBytes),
 			)
 			sec = secp.SecKeyFromBytes(secBytes)
 		case strings.HasPrefix(args[0], nostr.SecHRP):
 			sec, err = nostr.DecodeSecretKey(args[0])
-		case strings.HasPrefix(args[0], "0x"):
+		default:
 			var secBytes []byte
-			secBytes, err = hex.DecodeString(args[0][2:])
+			secBytes, err = hex.DecodeString(args[0])
+			if err != nil {
+				_, _ = fmt.Fprintln(os.Stderr,
+					"key should be in hex or is somehow mangled, cannot decode: "+err.Error())
+				os.Exit(1)
+			}
 			sec = secp.SecKeyFromBytes(secBytes)
 		}
 		if err != nil {
@@ -58,7 +73,7 @@ Word keys will be tried in english first and then all the other languages if the
 		pub := sec.PubKey()
 		secBytes := sec.Serialize()
 		pubBytes := schnorr.SerializePubKey(pub)
-		fmt.Printf("hex:\n\tsecret: 0x%s\n\tpublic: 0x%s\n",
+		fmt.Printf("hex:\n\tsecret: %s\n\tpublic: %s\n",
 			hex.EncodeToString(secBytes),
 			hex.EncodeToString(pubBytes),
 		)
