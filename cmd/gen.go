@@ -27,7 +27,7 @@ pairs of public and private keys.`,
 		}
 		secBytes := sec.Serialize()
 		pubBytes := schnorr.SerializePubKey(pub)
-		fmt.Printf("hex:\n\tsecret: %s\n\tpublic: %s\n",
+		fmt.Printf("hex:\n\tsecret: 0x%s\n\tpublic: 0x%s\n",
 			hex.EncodeToString(secBytes),
 			hex.EncodeToString(pubBytes),
 		)
@@ -36,7 +36,7 @@ pairs of public and private keys.`,
 		npub, _ := nostr.PublicKeyToString(pub)
 		fmt.Printf("nostr:\n\tsecret: %s\n\tpublic: %s\n", nsec, npub)
 		var mnem string
-		lang := cmd.PersistentFlags().Lookup("lang").Value.String()
+		lang := rootCmd.PersistentFlags().Lookup("lang").Value.String()
 		mnem, _ = bip39.NewMnemonicByEntropy(secBytes, bip39langs.Map[lang])
 		fmt.Printf("bip39:\n\t%s\n", mnem)
 	},
@@ -57,11 +57,6 @@ func init() {
 	rootCmd.AddCommand(genCmd)
 
 	// Here you will define your flags and configuration settings.
-
-	langList := bip39langs.GetList()
-	genCmd.PersistentFlags().String("lang", "english",
-		"set the language word set for bip39 word keys "+
-			langList)
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

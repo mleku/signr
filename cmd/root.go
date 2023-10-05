@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/mleku/appdata"
+	"github.com/mleku/signr/pkg/bip39langs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -44,6 +45,11 @@ func init() {
 	dataDir = appdata.GetDataDir(rootCmd.Use, false)
 
 	cfgFile = filepath.Join(dataDir, rootCmd.Use+".yml")
+
+	langList := bip39langs.GetList()
+	rootCmd.PersistentFlags().String("lang", "english",
+		"set the language word set for bip39 word keys "+
+			langList)
 
 	// // Cobra also supports local flags, which will only run
 	// // when this action is called directly.

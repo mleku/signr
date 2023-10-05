@@ -8,12 +8,16 @@ import (
 )
 
 const (
-	secHRP = "nsec"
+	SecHRP = "nsec"
 	pubHRP = "npub"
 )
 
 func ConvertForBech32(b8 []byte) (b5 []byte, err error) {
 	return bech32.ConvertBits(b8, 8, 5, true)
+}
+
+func ConvertFromBech32(b5 []byte) (b8 []byte, err error) {
+	return bech32.ConvertBits(b5, 5, 8, true)
 }
 
 func SecretKeyToString(sk *secp.SecretKey) (encoded string, err error) {
@@ -23,7 +27,7 @@ func SecretKeyToString(sk *secp.SecretKey) (encoded string, err error) {
 		return
 	}
 
-	return bech32.Encode(secHRP, bits5)
+	return bech32.Encode(SecHRP, bits5)
 }
 
 func PublicKeyToString(pk *secp.PublicKey) (encoded string, err error) {
@@ -37,26 +41,34 @@ func PublicKeyToString(pk *secp.PublicKey) (encoded string, err error) {
 }
 
 func DecodeSecretKey(encoded string) (sk *secp.SecretKey, err error) {
-	var b []byte
+	var b5, b8 []byte
 	var hrp string
-	hrp, b, err = bech32.Decode(encoded)
-	if hrp != secHRP {
+	hrp, b5, err = bech32.Decode(encoded)
+	if hrp != SecHRP {
 		err = fmt.Errorf("wrong human readable part, got '%s' want '%s'",
-			hrp, secHRP)
+			hrp, SecHRP)
 		return
 	}
-	sk = secp.SecKeyFromBytes(b)
+	b8, err = ConvertFromBech32(b5)
+	if err != nil {
+		return
+	}
+	sk = secp.SecKeyFromBytes(b8)
 	return
 }
 
 func DecodePublicKey(encoded string) (sk *secp.PublicKey, err error) {
-	var b []byte
+	var b5, b8 []byte
 	var hrp string
-	hrp, b, err = bech32.Decode(encoded)
+	hrp, b5, err = bech32.Decode(encoded)
 	if hrp != pubHRP {
 		err = fmt.Errorf("wrong human readable part, got '%s' want '%s'",
 			hrp, pubHRP)
 		return
 	}
-	return schnorr.ParsePubKey(b)
+	b8, err = ConvertFromBech32(b5)
+	if err != nil {
+		return
+	}
+	return schnorr.ParsePubKey(b8)
 }
