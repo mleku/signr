@@ -1,4 +1,4 @@
-package _import
+package cmd
 
 import (
 	"fmt"
@@ -6,9 +6,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// nsecCmd represents the nsec command
-var nsecCmd = &cobra.Command{
-	Use:   "nsec",
+// ecdsaCmd represents the ecdsa command
+var ecdsaCmd = &cobra.Command{
+	Use:   "ecdsa",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -17,20 +17,20 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("nsec called")
+		fmt.Println("ecdsa called")
 	},
 }
 
 func init() {
-	importCmd.AddCommand(nsecCmd)
+	signCmd.AddCommand(ecdsaCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// nsecCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// ecdsaCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// nsecCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// ecdsaCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
