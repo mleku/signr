@@ -64,6 +64,10 @@ var importCmd = &cobra.Command{
 			fmt.Printf("nostr:\n\tsecret: %s\n\tpublic: %s\n\n",
 				nsec, npub)
 		}
+		if err = Save(args[1], secBytes, npub); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr,
+				"error saving keys: %v", err)
+		}
 	},
 }
 

@@ -8,7 +8,6 @@ import (
 	"github.com/mleku/signr/pkg/nostr"
 	"github.com/spf13/cobra"
 	"os"
-	"path/filepath"
 )
 
 // genCmd represents the gen command
@@ -22,9 +21,6 @@ pairs of public and private keys.`,
 			_, _ = fmt.Fprintln(os.Stderr, "key name is required")
 			os.Exit(1)
 		}
-
-		secPath := filepath.Join(dataDir, args[0])
-		pubPath := secPath + PubExtension
 
 		sec, pub, err := GenKeyPair()
 		if err != nil {
@@ -48,9 +44,11 @@ pairs of public and private keys.`,
 				"nostr:\n\tsecret: %s\n\tpublic: %s\n\n", nsec,
 				npub)
 		}
-		_, _ = fmt.Fprintf(os.Stderr,
-			"saving secret key in '%s', public key in '%s'\n",
-			secPath, pubPath)
+
+		if err = Save(args[0], secBytes, npub); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr,
+				"error saving keys: %v", err)
+		}
 	},
 }
 

@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-var dataDir, cfgFile string
+var dataDir, cfgFile, defaultKey string
 var verbose bool
 
 // rootCmd represents the base command when called without any subcommands
@@ -20,10 +20,6 @@ var rootCmd = &cobra.Command{
 
 Designed to function in a similar way to ssh-keygen in that it keeps the keychain in a user directory with named key pairs and a configuration file.
 `,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) {
-	// },
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -36,38 +32,52 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+
 	dataDir = appdata.GetDataDir(rootCmd.Use, false)
-	cfgFile = filepath.Join(dataDir, rootCmd.Use+".yml")
+	if _, err := os.Stat(dataDir); err != nil {
+		if os.IsNotExist(err) {
+			_, _ = fmt.Fprintf(os.Stderr,
+				"creating signr data directory at '%s'\n", dataDir)
+			if err = os.MkdirAll(dataDir, 0700); err != nil {
+				_, _ = fmt.Fprintf(os.Stderr,
+					"unable to create data dir, cannot proceed\n")
+				os.Exit(1)
+			}
+		} else {
+			panic(err)
+		}
+	}
+	cfgFile = filepath.Join(dataDir, rootCmd.Use+".yaml")
+	if _, err := os.Stat(dataDir); err != nil {
+		if os.IsNotExist(err) {
+			_, _ = fmt.Fprintf(os.Stderr,
+				"creating signr data directory at '%s'\n", dataDir)
+		} else {
+			panic(err)
+		}
+	}
+
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false,
 		"prints more things")
+	rootCmd.PersistentFlags().StringVarP(&defaultKey, "usekey", "u", "",
+		"set secret key for signing by name")
+	cobra.OnInitialize(initConfig)
 
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(dataDir)
 
-	if cfgFile != "" {
-
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-
-	} else {
-
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".cmd" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".cmd")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
+	// read in environment variables that match
+	viper.AutomaticEnv()
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		_, _ = fmt.Fprintln(os.Stderr, "Using config file:",
+			viper.ConfigFileUsed())
 	}
+	defaultKey = viper.GetString("default")
 }
