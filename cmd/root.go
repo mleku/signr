@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/mleku/appdata"
-	"github.com/mleku/signr/pkg/bip39langs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -11,6 +10,7 @@ import (
 )
 
 var dataDir, cfgFile string
+var verbose bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -37,31 +37,23 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
 	dataDir = appdata.GetDataDir(rootCmd.Use, false)
-
 	cfgFile = filepath.Join(dataDir, rootCmd.Use+".yml")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false,
+		"prints more things")
 
-	langList := bip39langs.GetList()
-	rootCmd.PersistentFlags().String("lang", "english",
-		"set the language word set for bip39 word keys "+
-			langList)
-
-	// // Cobra also supports local flags, which will only run
-	// // when this action is called directly.
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+
 	if cfgFile != "" {
+
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
+
 	} else {
+
 		// Find home directory.
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)

@@ -1,7 +1,6 @@
 # signr
 
-Designed along similar lines to `ssh-keygen` but with a more singular purpose,
-`signr` can generate new keys, keeping them in a directory with a familiar
+Designed along similar lines to `ssh-keygen`, `signr` can generate new keys, password protect them, keeping them in a directory with a familiar
 similar layout as `.ssh`, as well as sign and verify.
 
 It provides the following functionality:
@@ -10,13 +9,11 @@ It provides the following functionality:
 
     - [x] hexadecimal
     - [x] nsec
-    - [x] BIP39 word-keys
 
 - Secret key import 
 
     - [x] hexadecimal
     - [x] nsec
-    - [ ] BIP39 word-keys
 
 - [ ] Signing - using a distinct protocol to keep the signature space
   isolated from other protocols, such as Bitcoin message signatures.
@@ -25,6 +22,8 @@ It provides the following functionality:
   a file
 
 - [ ] Keychain management - storing keys in user profile and validating security of these files (configuration and access similar to ssh with common tools).
+
+- [ ] Encryption of private keys.
 
 In order to prevent cross-protocol attacks, the signature is applied not
 directly on the hash of the message, but rather a distinctive structure
@@ -63,7 +62,7 @@ Each section is separated by a underscore, so the whole string is selected
 
 The canonical encoding of the signature prefix would thus look like this:
 
-signr_0_SHA256_ECDSA_deadbeefcafeb00b_npub1e44x0gq7xg2rln2ffyy4ck5ghyt03mstacupksjy462u50nqux6qt8zpf8_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    signr_0_SHA256_ECDSA_deadbeefcafeb00b_npub1e44x0gq7xg2rln2ffyy4ck5ghyt03mstacupksjy462u50nqux6qt8zpf8_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
 The provided signature contains the Bech32 encoded signature bytes in the 
 place of the message hash. The verifier splits off this signature, adds the 

@@ -3,22 +3,29 @@ package cmd
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/islishude/bip39"
 	"github.com/mleku/ec/schnorr"
 	secp "github.com/mleku/ec/secp"
-	"github.com/mleku/signr/pkg/bip39langs"
 	"github.com/mleku/signr/pkg/nostr"
 	"github.com/spf13/cobra"
 	"os"
+	"path/filepath"
 )
 
 // genCmd represents the gen command
 var genCmd = &cobra.Command{
-	Use:   "gen",
+	Use:   "gen <name>",
 	Short: "Generate a new nostr key",
 	Long: `Generates a new key and prints it out in all available formats as
 pairs of public and private keys.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			_, _ = fmt.Fprintln(os.Stderr, "key name is required")
+			os.Exit(1)
+		}
+
+		secPath := filepath.Join(dataDir, args[0])
+		pubPath := secPath + PubExtension
+
 		sec, pub, err := GenKeyPair()
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr,
@@ -27,27 +34,34 @@ pairs of public and private keys.`,
 		}
 		secBytes := sec.Serialize()
 		pubBytes := schnorr.SerializePubKey(pub)
-		fmt.Printf("hex:\n\tsecret: %s\n\tpublic: %s\n",
-			hex.EncodeToString(secBytes),
-			hex.EncodeToString(pubBytes),
-		)
-
+		if verbose {
+			_, _ = fmt.Fprintf(os.Stderr,
+				"generated key pair:\n\nhex:\n\tsecret: %s\n\tpublic: %s\n\n",
+				hex.EncodeToString(secBytes),
+				hex.EncodeToString(pubBytes),
+			)
+		}
 		nsec, _ := nostr.SecretKeyToString(sec)
 		npub, _ := nostr.PublicKeyToString(pub)
-		fmt.Printf("nostr:\n\tsecret: %s\n\tpublic: %s\n", nsec, npub)
-		var mnem string
-		lang := rootCmd.PersistentFlags().Lookup("lang").Value.String()
-		mnem, _ = bip39.NewMnemonicByEntropy(secBytes, bip39langs.Map[lang])
-		fmt.Printf("bip39:\n\t%s\n", mnem)
+		if verbose {
+			_, _ = fmt.Fprintf(os.Stderr,
+				"nostr:\n\tsecret: %s\n\tpublic: %s\n\n", nsec,
+				npub)
+		}
+		_, _ = fmt.Fprintf(os.Stderr,
+			"saving secret key in '%s', public key in '%s'\n",
+			secPath, pubPath)
 	},
 }
 
 func GenKeyPair() (sec *secp.SecretKey, pub *secp.PublicKey, err error) {
+
 	sec, err = secp.GenerateSecretKey()
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "error generating key: '%s'", err)
 		return
 	}
+
 	pub = sec.PubKey()
 
 	return
