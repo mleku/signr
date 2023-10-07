@@ -9,6 +9,10 @@ import (
 	"path/filepath"
 )
 
+const configExt = "yaml"
+const configName = "config"
+const pubExt = "pub"
+
 var dataDir, cfgFile, defaultKey string
 var verbose bool
 
@@ -47,7 +51,7 @@ func init() {
 			panic(err)
 		}
 	}
-	cfgFile = filepath.Join(dataDir, rootCmd.Use+".yaml")
+	cfgFile = filepath.Join(dataDir, rootCmd.Use+"."+configExt)
 	if _, err := os.Stat(dataDir); err != nil {
 		if os.IsNotExist(err) {
 			_, _ = fmt.Fprintf(os.Stderr,
@@ -59,16 +63,14 @@ func init() {
 
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false,
 		"prints more things")
-	rootCmd.PersistentFlags().StringVarP(&defaultKey, "usekey", "u", "",
-		"set secret key for signing by name")
 	cobra.OnInitialize(initConfig)
 
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
+	viper.SetConfigName(configName)
+	viper.SetConfigType(configExt)
 	viper.AddConfigPath(dataDir)
 
 	// read in environment variables that match
@@ -76,8 +78,10 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		_, _ = fmt.Fprintln(os.Stderr, "Using config file:",
-			viper.ConfigFileUsed())
+		if verbose {
+			_, _ = fmt.Fprintln(os.Stderr, "Using config file:",
+				viper.ConfigFileUsed())
+		}
 	}
 	defaultKey = viper.GetString("default")
 }
