@@ -9,21 +9,20 @@ It provides the following functionality:
 
     - [x] hexadecimal
     - [x] nsec
-
-- Secret key import 
-
+- [x] Secret key import 
     - [x] hexadecimal
-    - [x] nsec
-
-- [ ] Signing - using a distinct protocol to keep the signature space
-  isolated from other protocols, such as Bitcoin message signatures.
-
+    - [x] nostr nsec key format
+- [ ] Signing
 - [ ] Verification - checking that a signature matches a given file or hash on
   a file
+- [ ] Keychain management 
+    - [x]  storing keys in user profile 
 
-- [ ] Keychain management - storing keys in user profile and validating security of these files (configuration and access similar to ssh with common tools).
+    - [ ] validating filesystem security of these files 
 
-- [ ] Encryption of private keys.
+    - [x] setting a default key to use when unspecified for signing
+
+- [x] Encryption of private keys.
 
 In order to prevent cross-protocol attacks, the signature is applied not
 directly on the hash of the message, but rather a distinctive structure
