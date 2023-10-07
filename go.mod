@@ -3,9 +3,11 @@ module github.com/mleku/signr
 go 1.20
 
 require (
+	github.com/minio/sha256-simd v1.0.1
 	github.com/mleku/appdata v1.0.0
 	github.com/mleku/bech32 v1.0.0
 	github.com/mleku/ec v1.0.0
+	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
 	golang.org/x/crypto v0.9.0
@@ -19,7 +21,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.3 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
-	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/spf13/afero v1.9.5 // indirect
