@@ -12,9 +12,9 @@ It provides the following functionality:
 - [x] Secret key import 
     - [x] hexadecimal
     - [x] nostr nsec key format
-- [ ] Signing
-- [ ] Verification - checking that a signature matches a given file or hash on
-  a file
+- [ ] Signing of files - via path or via stdin
+- [ ] Verification - checking a signature matches a provided file or stream from stdin
+  
 - [ ] Keychain management 
     - [x]  storing keys in user profile 
 
@@ -22,7 +22,8 @@ It provides the following functionality:
 
     - [x] setting a default key to use when unspecified for signing
 
-- [x] Encryption of private keys.
+    - [x] Encryption of private keys.
+
 
 In order to prevent cross-protocol attacks, the signature is applied not
 directly on the hash of the message, but rather a distinctive structure
