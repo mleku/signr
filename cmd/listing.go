@@ -52,17 +52,17 @@ func GetList(g [][]string) (grid [][]string, encrypted map[string]struct{},
 	encrypted = make(map[string]struct{})
 	for i := range keySlice {
 		pubFilename := keySlice[i] + "." + pubExt
-		data, err = os.ReadFile(filepath.Join(dataDir, pubFilename))
+		data, err = ReadFile(pubFilename)
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr,
 				"error reading file %s: %v\n", pubFilename, err)
 			continue
 		}
 		var secData []byte
-		secData, err = os.ReadFile(filepath.Join(dataDir, keySlice[i]))
+		secData, err = ReadFile(keySlice[i])
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr,
-				"error reading file %s: %v\n", secData, err)
+				"error reading file '%s': %v\n", keySlice[i], err)
 			continue
 		}
 		if string(secData[0]) == "e" {

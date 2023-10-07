@@ -13,7 +13,7 @@ const configExt = "yaml"
 const configName = "config"
 const pubExt = "pub"
 
-var dataDir, cfgFile, defaultKey string
+var cfgFile, dataDir, defaultKey string
 var verbose bool
 
 // rootCmd represents the base command when called without any subcommands
@@ -38,7 +38,7 @@ func Execute() {
 func init() {
 
 	dataDir = appdata.GetDataDir(rootCmd.Use, false)
-	if _, err := os.Stat(dataDir); err != nil {
+	if fi, err := os.Stat(dataDir); err != nil {
 		if os.IsNotExist(err) {
 			_, _ = fmt.Fprintf(os.Stderr,
 				"creating signr data directory at '%s'\n", dataDir)
@@ -49,6 +49,18 @@ func init() {
 			}
 		} else {
 			panic(err)
+		}
+	} else {
+		// check the permissions
+		if fi.Mode().Perm()&0077 != 0 {
+			err = fmt.Errorf(
+				"data directory '%s' has insecure permissions %s"+
+					" recommended to restore it to -rwx------ (0700), "+
+					"and investigate how it got changed",
+				dataDir, fi.Mode().Perm())
+			_, _ = fmt.Fprintln(os.Stderr,
+				err)
+			os.Exit(1)
 		}
 	}
 	cfgFile = filepath.Join(dataDir, rootCmd.Use+"."+configExt)
