@@ -37,14 +37,7 @@ The raw bytes that are hashed using SHA256 are constructed as follows:
    Starts with 0.
 3. The hash function used, `SHA256` normally but allowing future additions,
    This is also part of the signature prefix.
-4. The signature algorithm is here encoded. It can be ECDSA for standard 
-   Bitcoin transaction signatures, which validate by producing the public 
-   key, thus eliminating the need to additionally specify the public key to 
-   the validator, allowing this key to be searched instead of pre-specified.
-   SCHNORR can be used to enable standard btcec Schnorr signatures, these 
-   require the verifier to also know the public key, and yield only a 
-   boolean result. ECDSA recovered signature yields the boolean by comparing 
-   with the provided key.
+4. The signature algorithm is here encoded. It supports BIP-340 style 32 byte public keys as specified in NIP-19, and produces 64 byte Schnorr signatures. It is specified to enable future expansion to support other signature algorithms.
 5. Nonce - a strong random value of 64 bits as 16 hex
    characters, that are repeated in the signature prefix to enable the
    generation of the actual message hash that is signed. This is here to 
