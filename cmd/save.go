@@ -8,10 +8,6 @@ import (
 	"path/filepath"
 )
 
-const (
-	PubExtension = ".pub"
-)
-
 const passPrompt = "type password to use for secret key (press enter for none): "
 
 func Save(name string, secret []byte, npub string) (err error) {
@@ -89,7 +85,7 @@ func Save(name string, secret []byte, npub string) (err error) {
 	}
 
 	secPath := filepath.Join(dataDir, name)
-	pubPath := secPath + PubExtension
+	pubPath := secPath + "." + pubExt
 	_, _ = fmt.Fprintf(os.Stderr,
 		"saving secret key in '%s', public key in '%s'\n",
 		secPath, pubPath)
