@@ -70,5 +70,5 @@ func DecodePublicKey(encoded string) (sk *secp.PublicKey, err error) {
 	if err != nil {
 		return
 	}
-	return schnorr.ParsePubKey(b8)
+	return schnorr.ParsePubKey(b8[:32])
 }
