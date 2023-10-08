@@ -65,7 +65,7 @@ var importCmd = &cobra.Command{
 				nsec, npub)
 		}
 		if err = Save(args[1], secBytes, npub); err != nil {
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"error saving keys: %v", err)
 		}
 	},

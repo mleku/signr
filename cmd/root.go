@@ -40,10 +40,10 @@ func init() {
 	dataDir = appdata.GetDataDir(rootCmd.Use, false)
 	if fi, err := os.Stat(dataDir); err != nil {
 		if os.IsNotExist(err) {
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"creating signr data directory at '%s'\n", dataDir)
 			if err = os.MkdirAll(dataDir, 0700); err != nil {
-				_, _ = fmt.Fprintf(os.Stderr,
+				printErr(
 					"unable to create data dir, cannot proceed\n")
 				os.Exit(1)
 			}
@@ -66,7 +66,7 @@ func init() {
 	cfgFile = filepath.Join(dataDir, rootCmd.Use+"."+configExt)
 	if _, err := os.Stat(dataDir); err != nil {
 		if os.IsNotExist(err) {
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"creating signr data directory at '%s'\n", dataDir)
 		} else {
 			panic(err)

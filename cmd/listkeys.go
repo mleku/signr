@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -18,7 +17,7 @@ var listkeysCmd = &cobra.Command{
 		grid, encrypted, err :=
 			GetList([][]string{{"name", "fingerprint"}})
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"error getting list: '%v'\n\n", err)
 			os.Exit(1)
 		}
@@ -41,7 +40,7 @@ var listkeysCmd = &cobra.Command{
 			})
 		grid = append(grid, tail...)
 		maxLen1++
-		_, _ = fmt.Fprintf(os.Stderr,
+		printErr(
 			"keys in keychain: (* = password protected)\n\n")
 		for i := range grid {
 			isDefault := "          "
@@ -54,7 +53,7 @@ var listkeysCmd = &cobra.Command{
 			}
 			grid[i][0] = grid[i][0] + strings.Repeat(" ",
 				maxLen1-len(grid[i][0]))
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"  %s %s%s\n", crypted, grid[i][0], grid[i][1]+isDefault)
 		}
 

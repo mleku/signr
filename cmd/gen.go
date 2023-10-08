@@ -24,14 +24,14 @@ pairs of public and private keys.`,
 
 		sec, pub, err := GenKeyPair()
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"error generating key: '%s'", err)
 			os.Exit(1)
 		}
 		secBytes := sec.Serialize()
 		pubBytes := schnorr.SerializePubKey(pub)
 		if verbose {
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"generated key pair:\n\nhex:\n\tsecret: %s\n\tpublic: %s\n\n",
 				hex.EncodeToString(secBytes),
 				hex.EncodeToString(pubBytes),
@@ -40,13 +40,13 @@ pairs of public and private keys.`,
 		nsec, _ := nostr.SecretKeyToString(sec)
 		npub, _ := nostr.PublicKeyToString(pub)
 		if verbose {
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"nostr:\n\tsecret: %s\n\tpublic: %s\n\n", nsec,
 				npub)
 		}
 
 		if err = Save(args[0], secBytes, npub); err != nil {
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"error saving keys: %v", err)
 		}
 	},
@@ -56,7 +56,7 @@ func GenKeyPair() (sec *secp.SecretKey, pub *secp.PublicKey, err error) {
 
 	sec, err = secp.GenerateSecretKey()
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "error generating key: '%s'", err)
+		printErr("error generating key: '%s'", err)
 		return
 	}
 

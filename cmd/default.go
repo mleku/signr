@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -17,15 +16,15 @@ if the following CLI argument starts with an @ it is interpreted to be the key f
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"ERROR: default key must be named.\n\nhere are the options:\n\n")
 			listkeysCmd.Run(cmd, args)
-			_, _ = fmt.Fprintf(os.Stderr, "\n")
+			printErr("\n")
 			os.Exit(1)
 		}
 		grid, _, err := GetList(nil)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"ERROR: '%s'\n\n", err)
 			os.Exit(1)
 		}
@@ -36,11 +35,11 @@ if the following CLI argument starts with an @ it is interpreted to be the key f
 					viper.Set("default", defaultKey)
 					err = viper.WriteConfig()
 					if err != nil {
-						_, _ = fmt.Fprintf(os.Stderr,
+						printErr(
 							"failed to update config: '%v'\n", err)
 						return
 					}
-					_, _ = fmt.Fprintf(os.Stderr,
+					printErr(
 						"key %s %s now default\n",
 						grid[i][0], grid[i][1])
 					return

@@ -2,14 +2,12 @@ package cmd
 
 import (
 	"encoding/hex"
-	"fmt"
 	"github.com/minio/sha256-simd"
 	"github.com/mleku/ec/schnorr"
 	secp "github.com/mleku/ec/secp"
 	"github.com/mleku/signr/pkg/nostr"
 	"github.com/pkg/errors"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -54,14 +52,14 @@ func GetList(g [][]string) (grid [][]string, encrypted map[string]struct{},
 		pubFilename := keySlice[i] + "." + pubExt
 		data, err = ReadFile(pubFilename)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"error reading file %s: %v\n", pubFilename, err)
 			continue
 		}
 		var secData []byte
 		secData, err = ReadFile(keySlice[i])
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"error reading file '%s': %v\n", keySlice[i], err)
 			continue
 		}
@@ -73,7 +71,7 @@ func GetList(g [][]string) (grid [][]string, encrypted map[string]struct{},
 		var pk *secp.PublicKey
 		pk, err = nostr.DecodePublicKey(key)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr,
+			printErr(
 				"error decoding key '%s' %s: %v\n",
 				keySlice[i], pk, err)
 			continue

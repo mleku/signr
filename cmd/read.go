@@ -15,12 +15,12 @@ func ReadFile(name string) (data []byte, err error) {
 	var fi os.FileInfo
 	fi, err = os.Stat(path)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr,
+		printErr(
 			"error getting file info for %s: %v\n", name, err)
 	}
 
 	// secret key files that are readable by other than the owner may not be used
-	if fi.Mode().Perm()&0077 != 0 && strings.HasSuffix(name, "."+pubExt) {
+	if fi.Mode().Perm()&0077 != 0 && !strings.HasSuffix(name, "."+pubExt) {
 		err = fmt.Errorf("secret key has insecure permissions %s",
 			fi.Mode().Perm())
 		return
@@ -28,7 +28,7 @@ func ReadFile(name string) (data []byte, err error) {
 
 	data, err = os.ReadFile(path)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr,
+		printErr(
 			"error reading file '%s': %v\n", name, err)
 		return
 	}
