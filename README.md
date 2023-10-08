@@ -50,7 +50,7 @@ Each section is separated by a underscore, so the whole string is selected
 
 The canonical encoding of the signature prefix would thus look like this:
 
-    signr_0_SHA256_ECDSA_deadbeefcafeb00b_npub1e44x0gq7xg2rln2ffyy4ck5ghyt03mstacupksjy462u50nqux6qt8zpf8_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    signr_0_SHA256_SCHNORR_deadbeefcafeb00b_npub1e44x0gq7xg2rln2ffyy4ck5ghyt03mstacupksjy462u50nqux6qt8zpf8_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
 The provided signature contains the Bech32 encoded signature bytes in the 
 place of the message hash. The verifier splits off this signature, adds the 
