@@ -8,13 +8,11 @@ import (
 
 // verifyCmd represents the verify command
 var verifyCmd = &cobra.Command{
-	Use:   "verify <signature/sigfile> <signed file>",
-	Short: "Verify that a signature matches the provided file",
-	Long: `Verifies that the signature on a given file is correct.
+	Use:   "verify",
+	Short: "check that a file matches a signature",
+	Long: `checks that a signature is valid for a given file.
 
-Signature can be given on the commandline, if it starts with 'signr' and contains the expected series of '_' separated fields, or otherwise is interpreted as a file containing such a signature.
-
-The signed file can be given as '-' which indicates to read from the standard input as the file is being piped using '<' or '|'.`,
+the public key is embedded in the signature should also match the key expected to be used on the signature.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("verify called")
 	},

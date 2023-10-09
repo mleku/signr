@@ -17,10 +17,6 @@ import (
 	"strings"
 )
 
-const (
-	signrHRP = "signr"
-)
-
 // signCmd represents the sign command
 var signCmd = &cobra.Command{
 	Use:   "sign [flags] <file> [key name]",
@@ -116,7 +112,7 @@ Currently there isn't actually any flags, but there can be in the future.
 		messageHash := sha256.Sum256([]byte(message))
 
 		var key *secp.SecretKey
-		key, err = GetKey(signingKey)
+		key, err = GetKey(signingKey, cmd)
 		if err != nil {
 			printErr("ERROR: '%s'\n", err)
 			os.Exit(1)
@@ -152,7 +148,7 @@ func FormatSig(signingStrings []string, sig *schnorr.Signature) (str string,
 
 const unlockPrompt = "type password to unlock encrypted secret key: "
 
-func GetKey(name string) (key *secp.SecretKey, err error) {
+func GetKey(name string, cmd *cobra.Command) (key *secp.SecretKey, err error) {
 	var keyBytes []byte
 	keyBytes, err = ReadFile(name)
 	if err != nil {
@@ -181,8 +177,30 @@ func GetKey(name string) (key *secp.SecretKey, err error) {
 	}
 	originalSecret := keyBytes[:32]
 	secret := make([]byte, 32)
+	copy(secret, originalSecret)
+	passFlag := cmd.PersistentFlags().Lookup("pass")
+	if passFlag.Value.String() != "" {
+		pass := passFlag.Value.String()
+		actualKey := argon2.Key([]byte(pass), []byte("signr"),
+			3, 1024*1024, 4, 32)
+		secret = xor(secret, actualKey)
+		sec := secp.SecKeyFromBytes(secret)
+		pub := sec.PubKey()
+		pubBytes := schnorr.SerializePubKey(pub)
+		npub, _ := nostr.PublicKeyToString(pub)
+
+		pubBytes, err = ReadFile(name + "." + pubExt)
+		npubReal := strings.TrimSpace(string(pubBytes))
+		if npub != npubReal {
+			printErr(
+				"password failed to unlock key\n", err)
+				return
+		} else {
+			key = sec
+			return
+		}
+	}
 	if encrypted {
-		copy(secret, originalSecret)
 		var tryCount int
 		for tryCount < 3 {
 			pass, err := PasswordEntry(unlockPrompt)
@@ -224,7 +242,8 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// signCmd.PersistentFlags().String("foo", "", "A help for foo")
+	signCmd.PersistentFlags().String("pass", "",
+		"password to unlock the key")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

@@ -48,7 +48,8 @@ func init() {
 				os.Exit(1)
 			}
 		} else {
-			panic(err)
+			printErr("%s\n", err)
+			os.Exit(-1)
 		}
 	} else {
 		// check the permissions
@@ -69,7 +70,8 @@ func init() {
 			printErr(
 				"creating signr data directory at '%s'\n", dataDir)
 		} else {
-			panic(err)
+			printErr("%s\n", err)
+			os.Exit(-1)
 		}
 	}
 
