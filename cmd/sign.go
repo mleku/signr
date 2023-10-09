@@ -169,6 +169,10 @@ func GetKey(name string) (key *secp.SecretKey, err error) {
 				}
 			}
 		}
+		if sb == '\n' {
+			keyBytes = keyBytes[:64]
+			break
+		}
 	}
 	_, err = hex.Decode(keyBytes, keyBytes)
 	if err != nil {
@@ -176,8 +180,8 @@ func GetKey(name string) (key *secp.SecretKey, err error) {
 		return
 	}
 	originalSecret := keyBytes[:32]
+	secret := make([]byte, 32)
 	if encrypted {
-		secret := make([]byte, 32)
 		copy(secret, originalSecret)
 		var tryCount int
 		for tryCount < 3 {
@@ -207,6 +211,8 @@ func GetKey(name string) (key *secp.SecretKey, err error) {
 				break
 			}
 		}
+	} else {
+		key = secp.SecKeyFromBytes(originalSecret)
 	}
 	return
 }
