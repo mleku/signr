@@ -13,12 +13,9 @@ import (
 	"strings"
 )
 
-func GetList(g [][]string) (grid [][]string, encrypted map[string]struct{},
-	err error) {
+func GetKeyPairNames() (list []string, err error) {
 
-	grid = g
 	keyMap := make(map[string]int)
-
 	err = filepath.Walk(dataDir,
 		func(path string, info fs.FileInfo, err error) (e error) {
 			if info.IsDir() {
@@ -33,19 +30,29 @@ func GetList(g [][]string) (grid [][]string, encrypted map[string]struct{},
 				keyMap[splitted[0]]++
 			}
 			return
-		})
+		},
+	)
 	if err != nil {
 		err = errors.Wrap(err,
-			"failed wile walking data directory")
+			"failed while walking data directory")
 		return
 	}
-	var keySlice []string
 	for i := range keyMap {
 		if keyMap[i] == 2 {
-			keySlice = append(keySlice, i)
+			list = append(list, i)
 		}
 	}
-	sort.Strings(keySlice)
+	sort.Strings(list)
+	return
+}
+
+func GetList(g [][]string) (grid [][]string, encrypted map[string]struct{},
+	err error) {
+
+	grid = g
+	var keySlice []string
+	keySlice, err = GetKeyPairNames()
+
 	var data []byte
 	encrypted = make(map[string]struct{})
 	for i := range keySlice {
@@ -63,8 +70,16 @@ func GetList(g [][]string) (grid [][]string, encrypted map[string]struct{},
 				"error reading file '%s': %v\n", keySlice[i], err)
 			continue
 		}
-		if string(secData[0]) == "e" {
-			encrypted[keySlice[i]] = struct{}{}
+		for j, sb := range secData {
+			if sb == ' ' {
+				if len(secData) >= 64 {
+					if secData[j+1] == '*' {
+						secData = secData[:64]
+						encrypted[keySlice[i]] = struct{}{}
+						break
+					}
+				}
+			}
 		}
 		key := strings.TrimSpace(string(data))
 

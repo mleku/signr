@@ -1,15 +1,14 @@
 package cmd
 
 import (
-	"fmt"
 	"golang.org/x/term"
 	"syscall"
 )
 
 func PasswordEntry(prompt string) (pass []byte, err error) {
-	fmt.Print(prompt)
+	printErr(prompt)
 	pass, err = term.ReadPassword(int(syscall.Stdin))
-	fmt.Println()
+	printErr("\n")
 	if err != nil {
 		return
 	}

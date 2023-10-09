@@ -15,7 +15,7 @@ var listkeysCmd = &cobra.Command{
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		grid, encrypted, err :=
-			GetList([][]string{{"name", "fingerprint"}})
+			GetList([][]string{{"name", "pubkey fingerprint"}})
 		if err != nil {
 			printErr(
 				"error getting list: '%v'\n\n", err)
