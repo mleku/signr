@@ -9,7 +9,8 @@ import (
 
 const (
 	SecHRP = "nsec"
-	pubHRP = "npub"
+	PubHRP = "npub"
+	SigHRP = "sig"
 )
 
 func ConvertForBech32(b8 []byte) (b5 []byte, err error) {
@@ -22,12 +23,12 @@ func ConvertFromBech32(b5 []byte) (b8 []byte, err error) {
 
 func SecretKeyToString(sk *secp.SecretKey) (encoded string, err error) {
 
-	var bits5 []byte
-	if bits5, err = ConvertForBech32(sk.Serialize()); err != nil {
+	var b5 []byte
+	if b5, err = ConvertForBech32(sk.Serialize()); err != nil {
 		return
 	}
 
-	return bech32.Encode(SecHRP, bits5)
+	return bech32.Encode(SecHRP, b5)
 }
 
 func PublicKeyToString(pk *secp.PublicKey) (encoded string, err error) {
@@ -37,7 +38,7 @@ func PublicKeyToString(pk *secp.PublicKey) (encoded string, err error) {
 		return
 	}
 
-	return bech32.Encode(pubHRP, bits5)
+	return bech32.Encode(PubHRP, bits5)
 }
 
 func DecodeSecretKey(encoded string) (sk *secp.SecretKey, err error) {
@@ -57,13 +58,17 @@ func DecodeSecretKey(encoded string) (sk *secp.SecretKey, err error) {
 	return
 }
 
-func DecodePublicKey(encoded string) (sk *secp.PublicKey, err error) {
+func DecodePublicKey(encoded string) (pk *secp.PublicKey, err error) {
 	var b5, b8 []byte
 	var hrp string
 	hrp, b5, err = bech32.Decode(encoded)
-	if hrp != pubHRP {
+	if err != nil {
+		err = fmt.Errorf("ERROR: '%s'\n", err)
+		return
+	}
+	if hrp != PubHRP {
 		err = fmt.Errorf("wrong human readable part, got '%s' want '%s'",
-			hrp, pubHRP)
+			hrp, PubHRP)
 		return
 	}
 	b8, err = ConvertFromBech32(b5)
@@ -71,4 +76,36 @@ func DecodePublicKey(encoded string) (sk *secp.PublicKey, err error) {
 		return
 	}
 	return schnorr.ParsePubKey(b8[:32])
+}
+
+func EncodeSignature(sig *schnorr.Signature) (str string, err error) {
+	var b5 []byte
+	b5, err = ConvertForBech32(sig.Serialize())
+	if err != nil {
+		err = fmt.Errorf("ERROR: '%s'\n", err)
+		return
+	}
+	str, err = bech32.Encode(SigHRP, b5)
+	return
+}
+
+func DecodeSignature(encoded string) (sig *schnorr.Signature, err error) {
+
+	var b5, b8 []byte
+	var hrp string
+	hrp, b5, err = bech32.DecodeNoLimit(encoded)
+	if err != nil {
+		fmt.Printf("ERROR: '%s'\n", err)
+		return
+	}
+	if hrp != SigHRP {
+		err = fmt.Errorf("wrong human readable part, got '%s' want '%s'",
+			hrp, SigHRP)
+		return
+	}
+	b8, err = ConvertFromBech32(b5)
+	if err != nil {
+		return
+	}
+	return schnorr.ParseSignature(b8[:64])
 }

@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/minio/sha256-simd"
-	"github.com/mleku/bech32"
 	"github.com/mleku/ec/schnorr"
 	secp "github.com/mleku/ec/secp"
 	"github.com/mleku/signr/pkg/nostr"
@@ -90,6 +89,7 @@ Currently there isn't actually any flags, but there can be in the future.
 			if err != nil {
 				printErr(
 					"ERROR: unable to open file: '%s'\n\n", err)
+				os.Exit(1)
 			}
 			defer func(f io.ReadCloser) {
 				err := f.Close()
@@ -109,7 +109,9 @@ Currently there isn't actually any flags, but there can be in the future.
 		sum := h.Sum(nil)
 		signingStrings = append(signingStrings, hex.EncodeToString(sum))
 		message := strings.Join(signingStrings, "_")
+
 		messageHash := sha256.Sum256([]byte(message))
+
 
 		var key *secp.SecretKey
 		key, err = GetKey(signingKey, cmd)
@@ -134,14 +136,8 @@ func FormatSig(signingStrings []string, sig *schnorr.Signature) (str string,
 	err error) {
 
 	prefix := signingStrings[:len(signingStrings)-1]
-	var b5 []byte
-	b5, err = nostr.ConvertForBech32(sig.Serialize())
-	if err != nil {
-		printErr("ERROR: '%s'\n", err)
-		return
-	}
 	var sigStr string
-	sigStr, err = bech32.Encode("", b5)
+	sigStr, err = nostr.EncodeSignature(sig)
 	return strings.Join(
 		append(prefix, sigStr), "_"), err
 }
