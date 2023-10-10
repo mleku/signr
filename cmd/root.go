@@ -38,51 +38,66 @@ func Execute() {
 func init() {
 
 	dataDir = appdata.GetDataDir(rootCmd.Use, false)
+
 	if fi, err := os.Stat(dataDir); err != nil {
+
 		if os.IsNotExist(err) {
-			printErr(
+
+			PrintErr(
 				"creating signr data directory at '%s'\n", dataDir)
 			if err = os.MkdirAll(dataDir, 0700); err != nil {
-				printErr(
-					"unable to create data dir, cannot proceed\n")
+				PrintErr("unable to create data dir, cannot proceed\n")
 				os.Exit(1)
 			}
+
 		} else {
-			printErr("%s\n", err)
-			os.Exit(-1)
+
+			PrintErr("%s\n", err)
+			os.Exit(1)
 		}
+
 	} else {
+
 		// check the permissions
 		if fi.Mode().Perm()&0077 != 0 {
+
 			err = fmt.Errorf(
 				"data directory '%s' has insecure permissions %s"+
 					" recommended to restore it to -rwx------ (0700), "+
 					"and investigate how it got changed",
 				dataDir, fi.Mode().Perm())
-			_, _ = fmt.Fprintln(os.Stderr,
-				err)
+
+			PrintErr("ERROR: '%s'\n", err)
 			os.Exit(1)
 		}
 	}
+
 	cfgFile = filepath.Join(dataDir, rootCmd.Use+"."+configExt)
+
 	if _, err := os.Stat(dataDir); err != nil {
+
 		if os.IsNotExist(err) {
-			printErr(
+
+			PrintErr(
 				"creating signr data directory at '%s'\n", dataDir)
+
 		} else {
-			printErr("%s\n", err)
-			os.Exit(-1)
+
+			PrintErr("%s\n", err)
+			os.Exit(1)
 		}
 	}
 
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false,
-		"prints more things")
+	rootCmd.PersistentFlags().
+		BoolVarP(&verbose, "verbose", "v", false, "prints more things")
+
 	cobra.OnInitialize(initConfig)
 
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+
 	viper.SetConfigName(configName)
 	viper.SetConfigType(configExt)
 	viper.AddConfigPath(dataDir)
@@ -91,11 +106,10 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		if verbose {
-			_, _ = fmt.Fprintln(os.Stderr, "Using config file:",
-				viper.ConfigFileUsed())
-		}
+	if err := viper.ReadInConfig(); err == nil && verbose {
+
+		PrintErr("Using config file:", viper.ConfigFileUsed())
 	}
+
 	defaultKey = viper.GetString("default")
 }

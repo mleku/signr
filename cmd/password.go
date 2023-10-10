@@ -6,11 +6,12 @@ import (
 )
 
 func PasswordEntry(prompt string) (pass []byte, err error) {
-	printErr(prompt)
+
+	PrintErr(prompt)
+
 	pass, err = term.ReadPassword(int(syscall.Stdin))
-	printErr("\n")
-	if err != nil {
-		return
-	}
+
+	PrintErr("\n")
+
 	return
 }
