@@ -8,12 +8,18 @@ It provides the following functionality:
 - [x] Key generation - using the system's strong entropy source
 
     - [x] hexadecimal
-    - [x] nsec
+    - [x] nostr nsec format
 - [x] Secret key import 
     - [x] hexadecimal
     - [x] nostr nsec key format
-- [ ] Signing of files - via path or via stdin
-- [ ] Verification - checking a signature matches a provided file or stream from stdin
+- [x] Signing of data 
+    - [x] from file 
+    - [x] piped via stdin
+
+- [x] Verification - checking a signature matches
+    - [x] from file 
+    - [x] piped via stdin
+
 - [x] Keychain management 
     - [x] storing keys in user profile
     - [x] validating filesystem security of keychain files and folder
@@ -47,14 +53,6 @@ Hash function strings should be as they are normally written as identifiers,
 usually all caps, this is necessary otherwise there could be malleability.
 Each section is separated by a underscore, so the whole string is selected 
 "by word" with most GUI text selection systems using a double click.
-
-The canonical encoding of the signature prefix would thus look like this:
-
-    signr_0_SHA256_SCHNORR_0f22f1971e7553d4_npub1fltfn8yz0lqsf0rgqard3xj26tvdh0wtv0hfn6dlsqe240s8c0uqqxsxhx_a1ed44496778f40cd3da29f7afcdaf7bf145c70c0468140d5c234fa6404a0d9b
-
-which produces this hash:
-
-    7033257bae53ca295e310375afc05e7aa1bd2ddb5531fd1bf109d9c5363a8986
 
 The provided signature contains the Bech32 encoded signature bytes in the 
 place of the message hash. The verifier splits off this signature, adds the 
