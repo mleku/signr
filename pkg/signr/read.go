@@ -1,4 +1,4 @@
-package cmd
+package signr
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ReadFile(name string) (data []byte, err error) {
+func ReadFile(dataDir, name string) (data []byte, err error) {
 
 	path := filepath.Join(dataDir, name)
 
@@ -15,13 +15,14 @@ func ReadFile(name string) (data []byte, err error) {
 	var fi os.FileInfo
 	fi, err = os.Stat(path)
 	if err != nil {
-		PrintErr(
-			"error getting file info for %s: %v\n", name, err)
+
+		Fatal("error getting file info for %s: %v\n", name, err)
 	}
 
 	// secret key files that are readable by other than the owner may not be
 	// used
-	if fi.Mode().Perm()&0077 != 0 && !strings.HasSuffix(name, "."+pubExt) {
+	if fi.Mode().Perm()&0077 != 0 && !strings.HasSuffix(name,
+		"."+PubExt) {
 
 		err = fmt.Errorf("secret key has insecure permissions %s",
 			fi.Mode().Perm())
@@ -30,6 +31,7 @@ func ReadFile(name string) (data []byte, err error) {
 
 	data, err = os.ReadFile(path)
 	if err != nil {
+
 		PrintErr("error reading file '%s': %v\n", name, err)
 	}
 	return

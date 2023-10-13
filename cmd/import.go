@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"encoding/hex"
-	"fmt"
 	"github.com/mleku/ec/schnorr"
 	secp "github.com/mleku/ec/secp"
 	"github.com/mleku/signr/pkg/nostr"
+	"github.com/mleku/signr/pkg/signr"
 	"github.com/spf13/cobra"
-	"os"
 	"strings"
 )
 
@@ -21,52 +20,63 @@ var importCmd = &cobra.Command{
 
 		argLen := len(args)
 		if argLen == 1 {
-			_, _ = fmt.Fprintln(os.Stderr,
-				"a key name is required after the secret key")
-			os.Exit(1)
+
+			signr.Fatal("a key name is required after the secret key")
 		}
 
 		var sec *secp.SecretKey
 		var err error
 		if strings.HasPrefix(args[0], nostr.SecHRP) {
-			sec, err = nostr.DecodeSecretKey(args[0])
-		} else {
-			var secBytes []byte
-			secBytes, err = hex.DecodeString(args[0])
-			if err != nil {
-				_, _ = fmt.Fprintln(os.Stderr,
-					"key should be in hex or is somehow mangled, cannot decode: "+err.Error())
-				os.Exit(1)
+
+			if sec, err = nostr.DecodeSecretKey(args[0]); err != nil {
+
+				signr.Fatal("ERROR: while decoding key: '%v'\n", err)
 			}
+
+		} else {
+
+			var secBytes []byte
+			if secBytes, err = hex.DecodeString(args[0]); err != nil {
+
+				signr.Fatal(
+					"key is mangled, '%s', cannot decode: '%v'\n", args[0], err)
+			}
+
 			sec = secp.SecKeyFromBytes(secBytes)
 		}
-		if err != nil {
-			_, _ = fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+
 		if sec == nil {
-			_, _ = fmt.Fprintln(os.Stderr,
-				"input did not match any known formats")
-			os.Exit(1)
+
+			signr.Fatal("input did not match any known formats")
 		}
+
 		pub := sec.PubKey()
 		secBytes := sec.Serialize()
-		pubBytes := schnorr.SerializePubKey(pub)
-		if verbose {
-			fmt.Printf("hex:\n\tsecret: %s\n\tpublic: %s\n",
+
+		npub, _ := nostr.PublicKeyToString(pub)
+
+		if cfg.Verbose {
+
+			pubBytes := schnorr.SerializePubKey(pub)
+
+			signr.PrintErr("hex:\n"+
+				"\tsecret: %s\n"+
+				"\tpublic: %s\n",
 				hex.EncodeToString(secBytes),
 				hex.EncodeToString(pubBytes),
 			)
-		}
-		nsec, _ := nostr.SecretKeyToString(sec)
-		npub, _ := nostr.PublicKeyToString(pub)
-		if verbose {
-			fmt.Printf("nostr:\n\tsecret: %s\n\tpublic: %s\n\n",
+
+			nsec, _ := nostr.SecretKeyToString(sec)
+
+			signr.PrintErr("nostr:\n"+
+				"\tsecret: %s\n"+
+				"\tpublic: %s\n\n",
 				nsec, npub)
 		}
-		if err = Save(args[1], secBytes, npub); err != nil {
-			PrintErr(
-				"error saving keys: %v", err)
+
+		if err = signr.Save(cfg, args[1], secBytes, npub); err != nil {
+
+			signr.Fatal("error saving keys: %v", err)
 		}
 	},
 }

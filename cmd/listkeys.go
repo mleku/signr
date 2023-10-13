@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"os"
+	"github.com/mleku/signr/pkg/signr"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -13,26 +13,35 @@ var listkeysCmd = &cobra.Command{
 	Long: `List the keys in the keychain with the name and fingerprint.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
+
 		grid, encrypted, err :=
-			GetList([][]string{{"name", "pubkey fingerprint"}})
+			signr.GetList(cfg, [][]string{{"name", "pubkey fingerprint"}})
 		if err != nil {
-			PrintErr(
-				"error getting list: '%v'\n\n", err)
-			os.Exit(1)
+
+			signr.Fatal("error getting list: '%v'\n\n", err)
 		}
+
+		// get the maximum width of the columns
 		var maxLen1, maxLen2 int
 		for i := range grid {
+
 			l := len(grid[i][0])
 			if l > maxLen1 {
+
 				maxLen1 = l
 			}
+
 			l = len(grid[i][1])
 			if l > maxLen2 {
+
 				maxLen2 = l
 			}
 		}
+
+		// split header from the grid
 		header, tail := grid[0], grid[1:]
 
+		// add separators to the columns.
 		grid = append([][]string{header},
 			[]string{
 				strings.Repeat("-", maxLen1) + " ",
@@ -40,33 +49,36 @@ var listkeysCmd = &cobra.Command{
 			},
 		)
 
+		// add the rows after the spacers
 		grid = append(grid, tail...)
 		maxLen1++
 
-		PrintErr("keys in keychain: (* = password protected)\n\n")
+		signr.PrintErr("keys in keychain: (* = password protected)\n\n")
 
-		for i := range grid {
+		for _, row := range grid {
 
+			// show default item
 			isDefault := "          "
+			if row[0] == cfg.DefaultKey {
 
-			if grid[i][0] == defaultKey {
 				isDefault = " (default)"
 			}
 
 			crypted := " "
-			if _, ok := encrypted[grid[i][0]]; ok {
+			if _, ok := encrypted[row[0]]; ok {
 				crypted = "*"
 			}
 
-			grid[i][0] = grid[i][0] +
-				strings.Repeat(" ", maxLen1-len(grid[i][0]))
-			PrintErr(
-				"  %s %s%s\n", crypted, grid[i][0], grid[i][1]+isDefault)
+			row[0] += strings.Repeat(" ", maxLen1-len(row[0]))
+
+			signr.PrintErr(
+				"  %s %s%s\n", crypted, row[0], row[1]+isDefault)
 		}
 
 	},
 }
 
 func init() {
+
 	rootCmd.AddCommand(listkeysCmd)
 }

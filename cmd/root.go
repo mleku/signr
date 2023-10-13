@@ -3,18 +3,14 @@ package cmd
 import (
 	"fmt"
 	"github.com/mleku/appdata"
+	"github.com/mleku/signr/pkg/signr"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
 )
 
-const configExt = "yaml"
-const configName = "config"
-const pubExt = "pub"
-
-var cfgFile, dataDir, defaultKey string
-var verbose bool
+var cfg signr.Config
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -37,22 +33,21 @@ func Execute() {
 
 func init() {
 
-	dataDir = appdata.GetDataDir(rootCmd.Use, false)
+	cfg.DataDir = appdata.GetDataDir(rootCmd.Use, false)
 
-	if fi, err := os.Stat(dataDir); err != nil {
+	if fi, err := os.Stat(cfg.DataDir); err != nil {
 
 		if os.IsNotExist(err) {
 
-			PrintErr(
-				"creating signr data directory at '%s'\n", dataDir)
-			if err = os.MkdirAll(dataDir, 0700); err != nil {
-				PrintErr("unable to create data dir, cannot proceed\n")
-				os.Exit(1)
+			signr.PrintErr(
+				"creating signr data directory at '%s'\n", cfg.DataDir)
+			if err = os.MkdirAll(cfg.DataDir, 0700); err != nil {
+				signr.Fatal("unable to create data dir, cannot proceed\n")
 			}
 
 		} else {
 
-			PrintErr("%s\n", err)
+			signr.PrintErr("%s\n", err)
 			os.Exit(1)
 		}
 
@@ -65,31 +60,29 @@ func init() {
 				"data directory '%s' has insecure permissions %s"+
 					" recommended to restore it to -rwx------ (0700), "+
 					"and investigate how it got changed",
-				dataDir, fi.Mode().Perm())
+				cfg.DataDir, fi.Mode().Perm())
 
-			PrintErr("ERROR: '%s'\n", err)
-			os.Exit(1)
+			signr.Fatal("ERROR: '%s'\n", err)
 		}
 	}
 
-	cfgFile = filepath.Join(dataDir, rootCmd.Use+"."+configExt)
+	cfg.CfgFile = filepath.Join(cfg.DataDir, rootCmd.Use+"."+signr.ConfigExt)
 
-	if _, err := os.Stat(dataDir); err != nil {
+	if _, err := os.Stat(cfg.DataDir); err != nil {
 
 		if os.IsNotExist(err) {
 
-			PrintErr(
-				"creating signr data directory at '%s'\n", dataDir)
+			signr.PrintErr(
+				"creating signr data directory at '%s'\n", cfg.DataDir)
 
 		} else {
 
-			PrintErr("%s\n", err)
-			os.Exit(1)
+			signr.Fatal("%s\n", err)
 		}
 	}
 
 	rootCmd.PersistentFlags().
-		BoolVarP(&verbose, "verbose", "v", false, "prints more things")
+		BoolVarP(&cfg.Verbose, "Verbose", "v", false, "prints more things")
 
 	cobra.OnInitialize(initConfig)
 
@@ -98,18 +91,18 @@ func init() {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 
-	viper.SetConfigName(configName)
-	viper.SetConfigType(configExt)
-	viper.AddConfigPath(dataDir)
+	viper.SetConfigName(signr.ConfigName)
+	viper.SetConfigType(signr.ConfigExt)
+	viper.AddConfigPath(cfg.DataDir)
 
 	// read in environment variables that match
 	viper.AutomaticEnv()
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil && verbose {
+	if err := viper.ReadInConfig(); err == nil && cfg.Verbose {
 
-		PrintErr("Using config file:", viper.ConfigFileUsed())
+		signr.PrintErr("Using config file: %s\n", viper.ConfigFileUsed())
 	}
 
-	defaultKey = viper.GetString("default")
+	cfg.DefaultKey = viper.GetString("default")
 }

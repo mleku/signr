@@ -49,6 +49,7 @@ func DecodeSecretKey(encoded string) (sk *secp.SecretKey, err error) {
 	var hrp string
 	hrp, b5, err = bech32.Decode(encoded)
 	if hrp != SecHRP {
+
 		err = fmt.Errorf("wrong human readable part, got '%s' want '%s'",
 			hrp, SecHRP)
 		return
@@ -56,6 +57,7 @@ func DecodeSecretKey(encoded string) (sk *secp.SecretKey, err error) {
 
 	b8, err = ConvertFromBech32(b5)
 	if err != nil {
+
 		return
 	}
 
@@ -70,11 +72,13 @@ func DecodePublicKey(encoded string) (pk *secp.PublicKey, err error) {
 	var hrp string
 	hrp, b5, err = bech32.Decode(encoded)
 	if err != nil {
+
 		err = fmt.Errorf("ERROR: '%s'\n", err)
 		return
 	}
 
 	if hrp != PubHRP {
+
 		err = fmt.Errorf("wrong human readable part, got '%s' want '%s'",
 			hrp, PubHRP)
 		return
@@ -93,6 +97,7 @@ func EncodeSignature(sig *schnorr.Signature) (str string, err error) {
 	var b5 []byte
 	b5, err = ConvertForBech32(sig.Serialize())
 	if err != nil {
+
 		err = fmt.Errorf("ERROR: '%s'\n", err)
 		return
 	}
@@ -107,11 +112,13 @@ func DecodeSignature(encoded string) (sig *schnorr.Signature, err error) {
 	var hrp string
 	hrp, b5, err = bech32.DecodeNoLimit(encoded)
 	if err != nil {
+
 		fmt.Printf("ERROR: '%s'\n", err)
 		return
 	}
 
 	if hrp != SigHRP {
+
 		err = fmt.Errorf("wrong human readable part, got '%s' want '%s'",
 			hrp, SigHRP)
 		return

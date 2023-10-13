@@ -7,6 +7,7 @@ import (
 	"github.com/mleku/ec/schnorr"
 	secp "github.com/mleku/ec/secp"
 	"github.com/mleku/signr/pkg/nostr"
+	"github.com/mleku/signr/pkg/signr"
 	"github.com/spf13/cobra"
 	"io"
 	"os"
@@ -25,7 +26,7 @@ use the filename '-' to indicate the file is being piped in via stdin.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) < 2 {
-			PrintErr("ERROR: at minimum a file and a keyfile name must be specified\n\n")
+			signr.PrintErr("ERROR: at minimum a file and a keyfile name must be specified\n\n")
 			os.Exit(1)
 		}
 
@@ -46,7 +47,7 @@ use the filename '-' to indicate the file is being piped in via stdin.`,
 
 			data, err = os.ReadFile(sigOrSigFile)
 			if err != nil {
-				PrintErr(
+				signr.PrintErr(
 					"ERROR: reading file '%s': %v\n", sigOrSigFile, err)
 				return
 			}
@@ -66,16 +67,14 @@ use the filename '-' to indicate the file is being piped in via stdin.`,
 			// read from the named file
 			f, err = os.Open(filename)
 			if err != nil {
-				PrintErr(
+				signr.Fatal(
 					"ERROR: unable to open file: '%s'\n\n", err)
-				os.Exit(1)
 			}
 
 			defer func(f io.ReadCloser) {
 				err := f.Close()
 				if err != nil {
-					PrintErr("ERROR: closing file '%s'\n", err)
-					os.Exit(1)
+					signr.Fatal("ERROR: closing file '%s'\n", err)
 				}
 			}(f)
 
@@ -85,9 +84,8 @@ use the filename '-' to indicate the file is being piped in via stdin.`,
 
 		// feed the file data through the hasher
 		if _, err := io.Copy(h, f); err != nil {
-			PrintErr(
+			signr.Fatal(
 				"ERROR: unable to read file to generate hash: '%s'\n\n", err)
-			os.Exit(1)
 		}
 		sum := h.Sum(nil)
 
@@ -113,8 +111,8 @@ use the filename '-' to indicate the file is being piped in via stdin.`,
 		var sig *schnorr.Signature
 		sig, err = nostr.DecodeSignature(signature)
 		if err != nil {
-			PrintErr("ERROR: decoding signature '%s'\n", err)
-			os.Exit(1)
+
+			signr.Fatal("ERROR: decoding signature '%s'\n", err)
 		}
 
 		// decode the public key
@@ -134,5 +132,7 @@ use the filename '-' to indicate the file is being piped in via stdin.`,
 }
 
 func init() {
+	verifyCmd.PersistentFlags().StringVar(&PubKey, "pubkey", "",
+		"public key to check with if custom protocol omits it from the output")
 	rootCmd.AddCommand(verifyCmd)
 }

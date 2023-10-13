@@ -1,10 +1,10 @@
-package cmd
+package signr
 
 import (
 	"encoding/hex"
 	"github.com/minio/sha256-simd"
 	"github.com/mleku/ec/schnorr"
-	secp "github.com/mleku/ec/secp"
+	"github.com/mleku/ec/secp"
 	"github.com/mleku/signr/pkg/nostr"
 	"github.com/pkg/errors"
 	"io/fs"
@@ -13,29 +13,38 @@ import (
 	"strings"
 )
 
-func GetKeyPairNames() (list []string, err error) {
+func GetKeyPairNames(Cfg Config) (list []string, err error) {
 
 	keyMap := make(map[string]int)
 
-	err = filepath.Walk(dataDir,
+	err = filepath.Walk(Cfg.DataDir,
 		func(path string, info fs.FileInfo, err error) (e error) {
+
 			if info.IsDir() {
 				return
 			}
+
 			filename := filepath.Base(path)
-			if strings.HasSuffix(filename, configExt) {
+			if strings.HasSuffix(filename, ConfigExt) {
+
 				return
 			}
+
+			if strings.HasSuffix(filename, DeletedExt) {
+
+				return
+			}
+
 			splitted := strings.Split(filename, ".")
-			if len(splitted) == 1 || splitted[1] == pubExt {
+			if len(splitted) == 1 || splitted[1] == PubExt {
+
 				keyMap[splitted[0]]++
 			}
 			return
 		},
 	)
 	if err != nil {
-		err = errors.Wrap(err,
-			"failed while walking data directory")
+		err = errors.Wrap(err, "failed while walking data directory")
 		return
 	}
 
@@ -52,33 +61,35 @@ func GetKeyPairNames() (list []string, err error) {
 	return
 }
 
-func GetList(g [][]string) (grid [][]string, encrypted map[string]struct{},
+func GetList(Cfg Config, g [][]string) (grid [][]string,
+	encrypted map[string]struct{},
 	err error) {
 
 	grid = g
 
 	var keySlice []string
-	keySlice, err = GetKeyPairNames()
+	keySlice, err = GetKeyPairNames(Cfg)
 	if err != nil {
-		PrintErr("error reading in keychain data '%s'\n", err)
+
+		Fatal("error reading in keychain data '%s'\n", err)
 	}
 
 	var data []byte
 	encrypted = make(map[string]struct{})
 	for i := range keySlice {
 
-		pubFilename := keySlice[i] + "." + pubExt
+		pubFilename := keySlice[i] + "." + PubExt
 
-		data, err = ReadFile(pubFilename)
+		data, err = ReadFile(Cfg.DataDir, pubFilename)
 		if err != nil {
+
 			PrintErr("error reading file %s: %v\n", pubFilename, err)
 			continue
 		}
-		key := strings.TrimSpace(string(data))
 
 		var secData []byte
-		secData, err = ReadFile(keySlice[i])
-		if err != nil {
+		if secData, err = ReadFile(Cfg.DataDir, keySlice[i]); err != nil {
+
 			PrintErr("error reading file '%s': %v\n", keySlice[i], err)
 			continue
 		}
@@ -97,9 +108,10 @@ func GetList(g [][]string) (grid [][]string, encrypted map[string]struct{},
 			}
 		}
 
-		var pk *secp.PublicKey
-		pk, err = nostr.DecodePublicKey(key)
-		if err != nil {
+		var pk *secp256k1.PublicKey
+		key := strings.TrimSpace(string(data))
+		if pk, err = nostr.DecodePublicKey(key); err != nil {
+
 			PrintErr("error decoding key '%s' %s: %v\n",
 				keySlice[i], pk, err)
 			continue
@@ -110,6 +122,7 @@ func GetList(g [][]string) (grid [][]string, encrypted map[string]struct{},
 
 		grid = append(grid,
 			[]string{
+
 				keySlice[i],
 				"@" + hex.EncodeToString(fingerprint[:8]),
 			},

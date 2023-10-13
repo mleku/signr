@@ -1,4 +1,4 @@
-package cmd
+package signr
 
 import (
 	"fmt"
@@ -8,15 +8,26 @@ import (
 	"path/filepath"
 )
 
-const passPrompt = "type password to use for secret key (press enter for none): "
+const PassPrompt = "type password to use for secret key (press enter for none): "
 
-func Save(name string, secret []byte, npub string) (err error) {
+func Save(cfg Config, name string, secret []byte,
+	npub string) (err error) {
+
+	// check that the name isn't already taken
+
+	newPath := filepath.Join(cfg.DataDir, name)
+	if _, err := os.Stat(cfg.DataDir); err != nil {
+		if !os.IsNotExist(err) {
+			PrintErr("'%s' already exists, please use a different name or delete the other.\n",
+				newPath)
+		}
+	}
 
 	var pass1, pass2 []byte
 	var tryCount int
 	for tryCount < 3 {
 
-		pass1, err = PasswordEntry(passPrompt)
+		pass1, err = PasswordEntry(PassPrompt, 0)
 		if err != nil {
 
 			PrintErr(
@@ -25,12 +36,12 @@ func Save(name string, secret []byte, npub string) (err error) {
 		}
 
 		if len(pass1) == 0 {
-			pass2, err = PasswordEntry(
-				"again (press enter again to confirm no encryption): ")
+			pass2, err = PasswordEntry("again (press enter again to confirm no encryption): ",
+				0)
 
 		} else {
 
-			pass2, err = PasswordEntry("again: ")
+			pass2, err = PasswordEntry("again: ", 0)
 		}
 
 		if err != nil {
@@ -90,7 +101,7 @@ func Save(name string, secret []byte, npub string) (err error) {
 
 		actualKey := argon2.Key(pass1,
 			[]byte("signr"), 3, 1024*1024, 4, 32)
-		secret = xor(secret, actualKey)
+		secret = XOR(secret, actualKey)
 
 		// sanitation
 		for i := range pass1 {
@@ -101,8 +112,8 @@ func Save(name string, secret []byte, npub string) (err error) {
 		}
 	}
 
-	secPath := filepath.Join(dataDir, name)
-	pubPath := secPath + "." + pubExt
+	secPath := filepath.Join(cfg.DataDir, name)
+	pubPath := secPath + "." + PubExt
 
 	PrintErr(
 		"saving secret key in '%s', public key in '%s'\n",
@@ -115,25 +126,28 @@ func Save(name string, secret []byte, npub string) (err error) {
 
 	secretString := fmt.Sprintf("%x%s", secret, passwordProtected)
 
-	if defaultKey == "" {
+	if cfg.DefaultKey == "" {
 
-		defaultKey = name
+		cfg.DefaultKey = name
 
-		viper.Set("default", defaultKey)
+		viper.Set("default", cfg.DefaultKey)
 
 		if err = viper.WriteConfig(); err != nil {
 			PrintErr("error: '%v'\n", err)
 		}
 	}
 
-	err = os.WriteFile(secPath, []byte(secretString+"\n"), 0600)
+	// key files are created with mode 0400, so that when they are deleted, the
+	// `rm` command requires a confirmation, in addition to not being readable
+	// by any other than the user themselves.
+	err = os.WriteFile(secPath, []byte(secretString+"\n"), 0400)
 	if err != nil {
 		PrintErr(
 			"unable to write secret key file '%s': %v\n", secPath, err)
 		os.Exit(1)
 	}
 
-	err = os.WriteFile(pubPath, []byte(npub+"\n"), 0600)
+	err = os.WriteFile(pubPath, []byte(npub+"\n"), 0400)
 	if err != nil {
 		PrintErr(
 			"unable to write public key file '%s': %v\n", pubPath, err)
@@ -143,12 +157,3 @@ func Save(name string, secret []byte, npub string) (err error) {
 	return
 }
 
-func xor(dest, src []byte) []byte {
-	if len(src) != len(dest) {
-		PrintErr("key and secret must be the same length")
-	}
-	for i := range dest {
-		dest[i] = dest[i] ^ src[i]
-	}
-	return dest
-}

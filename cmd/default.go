@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	"github.com/mleku/signr/pkg/signr"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 )
 
 var defaultCmd = &cobra.Command{
@@ -16,36 +16,37 @@ if the following CLI argument starts with an @ it is interpreted to be the key f
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) < 1 {
-			PrintErr(
-				"ERROR: default key must be named.\n\nhere are the options:\n\n")
+
+			signr.PrintErr(
+				"ERROR: default key must be named.\n\n" +
+					"here are the options:\n\n")
+
 			listkeysCmd.Run(cmd, args)
-			PrintErr("\n")
-			os.Exit(1)
+			signr.Fatal("\n")
 		}
 
-		grid, _, err := GetList(nil)
+		grid, _, err := signr.GetList(cfg, nil)
 		if err != nil {
-			PrintErr(
-				"ERROR: '%s'\n\n", err)
-			os.Exit(1)
+
+			signr.Fatal("ERROR: '%s'\n\n", err)
 		}
 
-		for i := range grid {
-			for j := range grid[i] {
+		for _, row := range grid {
 
-				if args[0] == grid[i][j] {
+			for j := range row {
 
-					defaultKey = grid[i][0]
+				if args[0] == row[j] {
 
-					viper.Set("default", defaultKey)
+					cfg.DefaultKey = row[0]
 
-					err = viper.WriteConfig()
-					if err != nil {
-						PrintErr("failed to update config: '%v'\n", err)
-						return
+					viper.Set("default", cfg.DefaultKey)
+
+					if err = viper.WriteConfig(); err != nil {
+
+						signr.Fatal("failed to update config: '%v'\n", err)
 					}
-					PrintErr("key %s %s now default\n",
-						grid[i][0], grid[i][1])
+
+					signr.PrintErr("key %s %s now default\n", row[0], row[1])
 					return
 				}
 			}
@@ -54,5 +55,6 @@ if the following CLI argument starts with an @ it is interpreted to be the key f
 }
 
 func init() {
+
 	setCmd.AddCommand(defaultCmd)
 }
