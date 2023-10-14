@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func GetKeyPairNames(Cfg Config) (list []string, err error) {
+func GetKeyPairNames(Cfg *Config) (list []string, err error) {
 
 	keyMap := make(map[string]int)
 
@@ -61,7 +61,7 @@ func GetKeyPairNames(Cfg Config) (list []string, err error) {
 	return
 }
 
-func GetList(Cfg Config, g [][]string) (grid [][]string,
+func GetList(Cfg *Config, g [][]string) (grid [][]string,
 	encrypted map[string]struct{},
 	err error) {
 

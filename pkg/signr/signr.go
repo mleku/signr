@@ -5,15 +5,25 @@ import (
 	"github.com/mleku/ec/schnorr"
 	"github.com/mleku/signr/pkg/nostr"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
 const (
-	ConfigExt  = "yaml"
-	DeletedExt = "del"
-	ConfigName = "config"
-	PubExt     = "pub"
+	AppName                    = "signr"
+	ConfigExt                  = "yaml"
+	DeletedExt                 = "del"
+	ConfigName                 = "config"
+	PubExt                     = "pub"
+	DataDirPerm    os.FileMode = 0700
+	ConfigFilePerm os.FileMode = 0600
+	KeyFilePerm    os.FileMode = 0400
+	DataFileMask   os.FileMode = 0077
 )
+
+func (cfg *Config) GetCfgFilename() string {
+	return filepath.Join(cfg.DataDir, ConfigName+"."+ConfigExt)
+}
 
 func GetDefaultSigningStrings() (signingStrings []string) {
 	// for now the first 4 are always the same

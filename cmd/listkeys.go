@@ -58,11 +58,10 @@ var listkeysCmd = &cobra.Command{
 		for _, row := range grid {
 
 			// show default item
-			isDefault := "          "
-			if row[0] == cfg.DefaultKey {
 
-				isDefault = " (default)"
-			}
+			defaultStr := make(map[bool]string)
+			defaultStr[true] = " (default)"
+			defaultStr[false] = strings.Repeat(" ", len(defaultStr[true]))
 
 			crypted := " "
 			if _, ok := encrypted[row[0]]; ok {
@@ -71,8 +70,8 @@ var listkeysCmd = &cobra.Command{
 
 			row[0] += strings.Repeat(" ", maxLen1-len(row[0]))
 
-			signr.PrintErr(
-				"  %s %s%s\n", crypted, row[0], row[1]+isDefault)
+			signr.PrintErr("  %s %s%s\n", crypted, row[0],
+				row[1]+defaultStr[row[0] == cfg.DefaultKey])
 		}
 
 	},

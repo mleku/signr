@@ -10,7 +10,7 @@ import (
 
 const PassPrompt = "type password to use for secret key (press enter for none): "
 
-func Save(cfg Config, name string, secret []byte,
+func Save(cfg *Config, name string, secret []byte,
 	npub string) (err error) {
 
 	// check that the name isn't already taken
@@ -115,9 +115,7 @@ func Save(cfg Config, name string, secret []byte,
 	secPath := filepath.Join(cfg.DataDir, name)
 	pubPath := secPath + "." + PubExt
 
-	PrintErr(
-		"saving secret key in '%s', public key in '%s'\n",
-		secPath, pubPath)
+	PrintErr("saving secret in '%s', public in '%s'\n", secPath, pubPath)
 
 	passwordProtected := ""
 	if len(pass1) > 0 {
@@ -133,7 +131,7 @@ func Save(cfg Config, name string, secret []byte,
 		viper.Set("default", cfg.DefaultKey)
 
 		if err = viper.WriteConfig(); err != nil {
-			PrintErr("error: '%v'\n", err)
+			PrintErr("error writing config: '%v'\n", err)
 		}
 	}
 
@@ -156,4 +154,3 @@ func Save(cfg Config, name string, secret []byte,
 
 	return
 }
-
