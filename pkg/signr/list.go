@@ -13,11 +13,11 @@ import (
 	"strings"
 )
 
-func GetKeyPairNames(Cfg *Config) (list []string, err error) {
+func (cfg *Config) GetKeyPairNames() (list []string, err error) {
 
 	keyMap := make(map[string]int)
 
-	err = filepath.Walk(Cfg.DataDir,
+	err = filepath.Walk(cfg.DataDir,
 		func(path string, info fs.FileInfo, err error) (e error) {
 
 			if info.IsDir() {
@@ -61,14 +61,14 @@ func GetKeyPairNames(Cfg *Config) (list []string, err error) {
 	return
 }
 
-func GetList(Cfg *Config, g [][]string) (grid [][]string,
+func (cfg *Config) GetList(g [][]string) (grid [][]string,
 	encrypted map[string]struct{},
 	err error) {
 
 	grid = g
 
 	var keySlice []string
-	keySlice, err = GetKeyPairNames(Cfg)
+	keySlice, err = cfg.GetKeyPairNames()
 	if err != nil {
 
 		Fatal("error reading in keychain data '%s'\n", err)
@@ -80,7 +80,7 @@ func GetList(Cfg *Config, g [][]string) (grid [][]string,
 
 		pubFilename := keySlice[i] + "." + PubExt
 
-		data, err = ReadFile(Cfg.DataDir, pubFilename)
+		data, err = cfg.ReadFile(pubFilename)
 		if err != nil {
 
 			PrintErr("error reading file %s: %v\n", pubFilename, err)
@@ -88,7 +88,7 @@ func GetList(Cfg *Config, g [][]string) (grid [][]string,
 		}
 
 		var secData []byte
-		if secData, err = ReadFile(Cfg.DataDir, keySlice[i]); err != nil {
+		if secData, err = cfg.ReadFile(keySlice[i]); err != nil {
 
 			PrintErr("error reading file '%s': %v\n", keySlice[i], err)
 			continue

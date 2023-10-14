@@ -3,7 +3,6 @@ package signr
 import (
 	"fmt"
 	"github.com/mleku/appdata"
-	"github.com/spf13/viper"
 	"os"
 )
 
@@ -69,8 +68,5 @@ func Init() (cfg *Config) {
 		Fatal("ERROR: %s\n", err)
 	}
 
-	cfg.DefaultKey = viper.GetString("default")
-
 	return cfg
 }
-

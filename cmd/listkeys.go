@@ -15,11 +15,15 @@ var listkeysCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		grid, encrypted, err :=
-			signr.GetList(cfg, [][]string{{"name", "pubkey fingerprint"}})
+			cfg.GetList([][]string{{"name", "fingerprint"}})
 		if err != nil {
 
 			signr.Fatal("error getting list: '%v'\n\n", err)
 		}
+
+		defaultStr := make(map[bool]string)
+		defaultStr[true] = " (default)"
+		defaultStr[false] = strings.Repeat(" ", len(defaultStr[true]))
 
 		// get the maximum width of the columns
 		var maxLen1, maxLen2 int
@@ -54,27 +58,27 @@ var listkeysCmd = &cobra.Command{
 		maxLen1++
 
 		signr.PrintErr("keys in keychain: (* = password protected)\n\n")
+		cryptedStr := make(map[bool]string)
+		cryptedStr[true] = " "
+		cryptedStr[false] = "*"
 
 		for _, row := range grid {
 
-			// show default item
+			_, clear := encrypted[row[0]]
 
-			defaultStr := make(map[bool]string)
-			defaultStr[true] = " (default)"
-			defaultStr[false] = strings.Repeat(" ", len(defaultStr[true]))
-
-			crypted := " "
-			if _, ok := encrypted[row[0]]; ok {
-				crypted = "*"
-			}
-
-			row[0] += strings.Repeat(" ", maxLen1-len(row[0]))
-
-			signr.PrintErr("  %s %s%s\n", crypted, row[0],
-				row[1]+defaultStr[row[0] == cfg.DefaultKey])
+			signr.PrintErr("  %s %s %s\n",
+				cryptedStr[!clear],
+				PadToLength(row[0], maxLen1),
+				row[1]+defaultStr[row[0] == cfg.DefaultKey],
+			)
 		}
 
 	},
+}
+
+func PadToLength(text string, length int) string {
+	pad := length - len(text)
+	return text + strings.Repeat(" ", pad)
 }
 
 func init() {

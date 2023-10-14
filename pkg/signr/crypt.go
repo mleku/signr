@@ -6,7 +6,6 @@ import (
 	"github.com/mleku/ec/secp"
 	"github.com/mleku/signr/pkg/nostr"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 	"golang.org/x/crypto/argon2"
 	"strings"
 )
@@ -24,12 +23,11 @@ func XOR(dest, src []byte) []byte {
 
 const UnlockPrompt = "type password to unlock encrypted secret key: "
 
-func GetKey(dataDir, name, pass string,
-	cmd *cobra.Command) (key *secp256k1.SecretKey,
+func (cfg *Config) GetKey(name, pass string) (key *secp256k1.SecretKey,
 	err error) {
 
 	var keyBytes []byte
-	keyBytes, err = ReadFile(dataDir, name)
+	keyBytes, err = cfg.ReadFile(name)
 	if err != nil {
 		err = errors.Wrap(err, "error getting key bytes:")
 	}
@@ -79,7 +77,7 @@ func GetKey(dataDir, name, pass string,
 		npub, _ := nostr.PublicKeyToString(pub)
 
 		// check the decrypted secret yields the stored pubkey
-		pubBytes, err = ReadFile(dataDir, name+"."+PubExt)
+		pubBytes, err = cfg.ReadFile(name + "." + PubExt)
 		npubReal := strings.TrimSpace(string(pubBytes))
 
 		if npub != npubReal {
@@ -117,7 +115,7 @@ func GetKey(dataDir, name, pass string,
 			npub, _ := nostr.PublicKeyToString(pub)
 
 			// check the decrypted secret generates the stored pubkey
-			pubBytes, err = ReadFile(dataDir, name+"."+PubExt)
+			pubBytes, err = cfg.ReadFile(name+"."+PubExt)
 			npubReal := strings.TrimSpace(string(pubBytes))
 
 			if npub != npubReal {

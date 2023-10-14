@@ -3,7 +3,6 @@ package cmd
 import (
 	"github.com/mleku/signr/pkg/signr"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var defaultCmd = &cobra.Command{
@@ -11,7 +10,9 @@ var defaultCmd = &cobra.Command{
 	Short: "set the default key to sign with",
 	Long: `sets the default key to sign with if not specified for the sign command.
 
-if the following CLI argument starts with an @ it is interpreted to be the key fingerprint
+if the following CLI argument starts with an @ it is interpreted to be the key fingerprint.
+
+either fingerprint or key name can be used to identify the key intended.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -25,32 +26,10 @@ if the following CLI argument starts with an @ it is interpreted to be the key f
 			signr.Fatal("\n")
 		}
 
-		grid, _, err := signr.GetList(cfg, nil)
-		if err != nil {
-
-			signr.Fatal("ERROR: '%s'\n\n", err)
+		if err := cfg.SetDefault(args[0]);err != nil {
+			signr.PrintErr("%s\n", err)
 		}
 
-		for _, row := range grid {
-
-			for j := range row {
-
-				if args[0] == row[j] {
-
-					cfg.DefaultKey = row[0]
-
-					viper.Set("default", cfg.DefaultKey)
-
-					if err = viper.WriteConfig(); err != nil {
-
-						signr.Fatal("failed to update config: '%v'\n", err)
-					}
-
-					signr.PrintErr("key %s %s now default\n", row[0], row[1])
-					return
-				}
-			}
-		}
 	},
 }
 

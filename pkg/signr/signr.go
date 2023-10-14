@@ -62,7 +62,7 @@ func FormatSig(signingStrings []string, sig *schnorr.Signature) (str string,
 	sigStr, err = nostr.EncodeSignature(sig)
 	if err != nil {
 
-		PrintErr("ERROR: while formatting signature: '%s'\n", err)
+		err = fmt.Errorf("ERROR: while formatting signature: '%s'\n", err)
 		return
 	}
 

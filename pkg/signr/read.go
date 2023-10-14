@@ -7,9 +7,9 @@ import (
 	"strings"
 )
 
-func ReadFile(dataDir, name string) (data []byte, err error) {
+func (cfg *Config) ReadFile(name string) (data []byte, err error) {
 
-	path := filepath.Join(dataDir, name)
+	path := filepath.Join(cfg.DataDir, name)
 
 	// check the permissions are secure first
 	var fi os.FileInfo

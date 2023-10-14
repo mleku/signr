@@ -39,7 +39,7 @@ func (cfg *Config) Gen(name string) {
 				npub)
 		}
 
-		if err = Save(cfg, name, secBytes, npub); err != nil {
+		if err = cfg.Save(name, secBytes, npub); err != nil {
 
 			Fatal("error saving keys: %v", err)
 		}

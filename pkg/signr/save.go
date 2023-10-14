@@ -10,7 +10,7 @@ import (
 
 const PassPrompt = "type password to use for secret key (press enter for none): "
 
-func Save(cfg *Config, name string, secret []byte,
+func (cfg *Config) Save(name string, secret []byte,
 	npub string) (err error) {
 
 	// check that the name isn't already taken
