@@ -9,7 +9,8 @@ const (
 	// other entry types (eg, GUIs) can be added here.
 )
 
-func (s *Signr) PasswordEntry(prompt string, entryType int) (pass []byte, err error) {
+func (s *Signr) PasswordEntry(prompt string, entryType int) (pass []byte,
+	err error) {
 
 	switch entryType {
 	case PasswordEntryViaTTY:

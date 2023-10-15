@@ -79,7 +79,7 @@ func (s *Signr) GetKey(name, passStr string) (key *secp256k1.SecretKey,
 
 			copy(secret, originalSecret)
 			if tryCount > 0 {
-				retryStr = fmt.Sprintf(" (attempt %d of %d)", tryCount, 3)
+				retryStr = fmt.Sprintf(" (attempt %d of %d)", tryCount+1, 3)
 			}
 			unlockPrompt := fmt.Sprintf("%s%s:", UnlockPrompt, retryStr)
 			pass, err = s.PasswordEntry(unlockPrompt, 0)
