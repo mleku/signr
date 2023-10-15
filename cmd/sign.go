@@ -40,7 +40,8 @@ The sigonly option is the same as the hex option except the output signature is 
 func init() {
 
 	signCmd.PersistentFlags().StringVarP(&Pass, "pass", "p", "",
-		"password to unlock the key")
+		"password to unlock the key - for better security, use the " +
+		"environment variable")
 	signCmd.PersistentFlags().StringVarP(&Custom, "custom", "k", "",
 		"custom additional namespace")
 	signCmd.PersistentFlags().BoolVarP(&Hex, "hex", "x", false,

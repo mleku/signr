@@ -45,6 +45,7 @@ func initConfig(cfg *signr.Signr) func() {
 		viper.AddConfigPath(cfg.DataDir)
 
 		// read in environment variables that match
+		viper.SetEnvPrefix(signr.AppName)
 		viper.AutomaticEnv()
 
 		// If a config file is found, read it in.

@@ -7,8 +7,8 @@ import (
 	"github.com/mleku/ec/schnorr"
 	secp "github.com/mleku/ec/secp"
 	"github.com/mleku/signr/pkg/nostr"
+	"github.com/mleku/signr/pkg/signr"
 	"github.com/spf13/cobra"
-	"io"
 	"os"
 	"strings"
 )
@@ -27,8 +27,7 @@ use the filename '-' to indicate the file is being piped in via stdin.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) < 2 {
-			cfg.Err("ERROR: at minimum a file and a keyfile name must be specified\n\n")
-			os.Exit(1)
+			cfg.Fatal("ERROR: at minimum a file and a keyfile name must be specified\n\n")
 		}
 
 		filename := args[0]
@@ -48,47 +47,51 @@ use the filename '-' to indicate the file is being piped in via stdin.`,
 
 			data, err = os.ReadFile(sigOrSigFile)
 			if err != nil {
-				cfg.Err(
+				cfg.Fatal(
 					"ERROR: reading file '%s': %v\n", sigOrSigFile, err)
-				return
 			}
 
 			signingStrings = strings.Split(string(data), "_")
 		}
+		var sum []byte
 
-		var f io.ReadCloser
-		switch {
-		case filename == "-":
-
-			// read from stdin
-			f = os.Stdin
-
-		default:
-
-			// read from the named file
-			f, err = os.Open(filename)
-			if err != nil {
-				cfg.Fatal(
-					"ERROR: unable to open file: '%s'\n\n", err)
-			}
-
-			defer func(f io.ReadCloser) {
-				err := f.Close()
-				if err != nil {
-					cfg.Fatal("ERROR: closing file '%s'\n", err)
-				}
-			}(f)
-
+		if sum, err = signr.HashFile(filename); err != nil {
+			cfg.Fatal("error while generating hash on file/input: %s\n", err)
 		}
 
-		h := sha256.New()
-
-		// feed the file data through the hasher
-		if _, err := io.Copy(h, f); err != nil {
-			cfg.Fatal(
-				"ERROR: unable to read file to generate hash: '%s'\n\n", err)
-		}
-		sum := h.Sum(nil)
+		// var f io.ReadCloser
+		// switch {
+		// case filename == "-":
+		//
+		// 	// read from stdin
+		// 	f = os.Stdin
+		//
+		// default:
+		//
+		// 	// read from the named file
+		// 	f, err = os.Open(filename)
+		// 	if err != nil {
+		// 		cfg.Fatal(
+		// 			"ERROR: unable to open file: '%s'\n\n", err)
+		// 	}
+		//
+		// 	defer func(f io.ReadCloser) {
+		// 		err := f.Close()
+		// 		if err != nil {
+		// 			cfg.Fatal("ERROR: closing file '%s'\n", err)
+		// 		}
+		// 	}(f)
+		//
+		// }
+		//
+		// h := sha256.New()
+		//
+		// // feed the file data through the hasher
+		// if _, err := io.Copy(h, f); err != nil {
+		// 	cfg.Fatal(
+		// 		"ERROR: unable to read file to generate hash: '%s'\n\n", err)
+		// }
+		// sum := h.Sum(nil)
 
 		// clean up the signature
 		signature := strings.TrimSpace(signingStrings[len(signingStrings)-1])

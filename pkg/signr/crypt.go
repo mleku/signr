@@ -7,6 +7,7 @@ import (
 	"github.com/mleku/ec/secp"
 	"github.com/mleku/signr/pkg/nostr"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/argon2"
 	"strings"
 )
@@ -57,6 +58,11 @@ func (s *Signr) GetKey(name, passStr string) (key *secp256k1.SecretKey,
 
 	secret := make([]byte, 32)
 
+	p := viper.GetString("pass")
+	if p != "" {
+		passStr = p
+	}
+
 	if passStr != "" {
 		copy(secret, originalSecret)
 		if key, err = s.DeriveAndCheckKey(name, secret,
@@ -66,7 +72,7 @@ func (s *Signr) GetKey(name, passStr string) (key *secp256k1.SecretKey,
 
 			return
 		}
-
+		return
 	}
 
 	var pass []byte
