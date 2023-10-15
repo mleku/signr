@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/mleku/signr/pkg/signr"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -18,7 +17,7 @@ var listkeysCmd = &cobra.Command{
 			cfg.GetList([][]string{{"name", "fingerprint"}})
 		if err != nil {
 
-			signr.Fatal("error getting list: '%v'\n\n", err)
+			cfg.Fatal("error getting list: '%v'\n\n", err)
 		}
 
 		defaultStr := make(map[bool]string)
@@ -57,7 +56,7 @@ var listkeysCmd = &cobra.Command{
 		grid = append(grid, tail...)
 		maxLen1++
 
-		signr.PrintErr("keys in keychain: (* = password protected)\n\n")
+		cfg.PrintErr("keys in keychain: (* = password protected)\n\n")
 		cryptedStr := make(map[bool]string)
 		cryptedStr[true] = " "
 		cryptedStr[false] = "*"
@@ -66,7 +65,7 @@ var listkeysCmd = &cobra.Command{
 
 			_, clear := encrypted[row[0]]
 
-			signr.PrintErr("  %s %s %s\n",
+			cfg.PrintErr("  %s %s %s\n",
 				cryptedStr[!clear],
 				PadToLength(row[0], maxLen1),
 				row[1]+defaultStr[row[0] == cfg.DefaultKey],

@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func (cfg *Config) Import(secKey, name string) (err error) {
+func (s *Signr) Import(secKey, name string) (err error) {
 
 	var sec *secp.SecretKey
 	if strings.HasPrefix(secKey, nostr.SecHRP) {
@@ -43,11 +43,11 @@ func (cfg *Config) Import(secKey, name string) (err error) {
 
 	npub, _ := nostr.PublicKeyToString(pub)
 
-	if cfg.Verbose {
+	if s.Verbose {
 
 		pubBytes := schnorr.SerializePubKey(pub)
 
-		PrintErr("hex:\n"+
+		s.PrintErr("hex:\n"+
 			"\tsecret: %s\n"+
 			"\tpublic: %s\n",
 			hex.EncodeToString(secBytes),
@@ -56,13 +56,13 @@ func (cfg *Config) Import(secKey, name string) (err error) {
 
 		nsec, _ := nostr.SecretKeyToString(sec)
 
-		PrintErr("nostr:\n"+
+		s.PrintErr("nostr:\n"+
 			"\tsecret: %s\n"+
 			"\tpublic: %s\n\n",
 			nsec, npub)
 	}
 
-	if err = cfg.Save(name, secBytes, npub); err != nil {
+	if err = s.Save(name, secBytes, npub); err != nil {
 
 		err = fmt.Errorf("error saving keys: %v", err)
 	}

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/mleku/signr/pkg/signr"
 	"github.com/spf13/cobra"
 )
 
@@ -18,16 +17,17 @@ either fingerprint or key name can be used to identify the key intended.
 
 		if len(args) < 1 {
 
-			signr.PrintErr(
+			cfg.Log(
 				"ERROR: default key must be named.\n\n" +
 					"here are the options:\n\n")
 
 			listkeysCmd.Run(cmd, args)
-			signr.Fatal("\n")
+			cfg.Fatal("\n")
 		}
 
 		if err := cfg.SetDefault(args[0]);err != nil {
-			signr.PrintErr("%s\n", err)
+			cfg.Err("%s\n", err)
+			return
 		}
 
 	},

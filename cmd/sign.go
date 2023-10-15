@@ -2,13 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mleku/signr/pkg/signr"
 	"github.com/spf13/cobra"
 )
 
 var (
-	Hex, OnlySig         bool
-	Pass, Custom, PubKey string
+	Hex, OnlySig bool
+	Pass, Custom string
 )
 
 // signCmd represents the sign command
@@ -26,7 +25,7 @@ If filename is in fact a 64 character hexadecimal value, it will be signed on wi
 		signature, err := cfg.Sign(args, Pass, Custom, Hex, OnlySig)
 		if err != nil {
 
-			signr.PrintErr("ERROR: while signing: %s\n", err)
+			cfg.Err("ERROR: while signing: %s\n", err)
 		} else {
 
 			fmt.Println(signature)
@@ -40,7 +39,7 @@ func init() {
 
 	signCmd.PersistentFlags().StringVarP(&Pass, "pass", "p", "",
 		"password to unlock the key")
-	signCmd.PersistentFlags().StringVarP(&Custom, "custom", "c", "",
+	signCmd.PersistentFlags().StringVarP(&Custom, "custom", "k", "",
 		"custom additional namespace")
 	signCmd.PersistentFlags().BoolVarP(&Hex, "hex", "x", false,
 		"print signature in hex")

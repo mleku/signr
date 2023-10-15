@@ -6,23 +6,23 @@ import (
 	"github.com/mleku/signr/pkg/nostr"
 )
 
-func (cfg *Config) Gen(name string) {
+func (s *Signr) Gen(name string) {
 
-		sec, pub, err := GenKeyPair()
+		sec, pub, err := s.GenKeyPair()
 		if err != nil {
 
-			Fatal("error generating key: '%s'", err)
+			s.Fatal("error generating key: '%s'", err)
 		}
 
 		secBytes := sec.Serialize()
 
 		npub, _ := nostr.PublicKeyToString(pub)
 
-		if cfg.Verbose {
+		if s.Verbose {
 
 			pubBytes := schnorr.SerializePubKey(pub)
 
-			PrintErr(
+			s.PrintErr(
 				"generated key pair:\n"+
 					"\nhex:\n"+
 					"\tsecret: %s\n"+
@@ -32,16 +32,16 @@ func (cfg *Config) Gen(name string) {
 			)
 
 			nsec, _ := nostr.SecretKeyToString(sec)
-			PrintErr(
+			s.PrintErr(
 				"nostr:\n"+
 					"\tsecret: %s\n"+
 					"\tpublic: %s\n\n", nsec,
 				npub)
 		}
 
-		if err = cfg.Save(name, secBytes, npub); err != nil {
+		if err = s.Save(name, secBytes, npub); err != nil {
 
-			Fatal("error saving keys: %v", err)
+			s.Fatal("error saving keys: %v", err)
 		}
 
 	return

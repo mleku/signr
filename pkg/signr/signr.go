@@ -2,6 +2,7 @@ package signr
 
 import (
 	"fmt"
+	"github.com/gookit/color"
 	"github.com/mleku/ec/schnorr"
 	"github.com/mleku/signr/pkg/nostr"
 	"os"
@@ -21,8 +22,8 @@ const (
 	DataFileMask   os.FileMode = 0077
 )
 
-func (cfg *Config) GetCfgFilename() string {
-	return filepath.Join(cfg.DataDir, ConfigName+"."+ConfigExt)
+func (s *Signr) GetCfgFilename() string {
+	return filepath.Join(s.DataDir, ConfigName+"."+ConfigExt)
 }
 
 func GetDefaultSigningStrings() (signingStrings []string) {
@@ -69,11 +70,35 @@ func FormatSig(signingStrings []string, sig *schnorr.Signature) (str string,
 	return strings.Join(append(prefix, sigStr), "_"), err
 }
 
-func PrintErr(format string, a ...interface{}) {
+func (s *Signr) Log(format string, a ...interface{}) {
+	if !s.Verbose {
+		return
+	}
+	if s.Color {
+		format = color.C256(214).Sprint("> ") + format
+	}
 	_, _ = fmt.Fprintf(os.Stderr, format, a...)
 }
 
-func Fatal(format string, a ...interface{}) {
-	PrintErr(format, a...)
+func (s *Signr) Err(format string, a ...interface{}) {
+	if !s.Verbose {
+		return
+	}
+	if s.Color {
+		format = color.Red.Sprint("! ") + format
+	}
+	_, _ = fmt.Fprintf(os.Stderr, format, a...)
+}
+
+func (s *Signr) Fatal(format string, a ...interface{}) {
+	if s.Color {
+		format = color.Red.Sprint("FATAL: ") + format
+	}
+	_, _ = fmt.Fprintf(os.Stderr, format, a...)
 	os.Exit(1)
 }
+
+func (s *Signr) PrintErr(format string, a ...interface{}) {
+	_, _ = fmt.Fprintf(os.Stderr, format, a...)
+}
+

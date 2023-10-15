@@ -6,36 +6,37 @@ import (
 	"os"
 )
 
-// Config stores the configuration for signr.
-type Config struct {
+// Signr stores the configuration for signr.
+type Signr struct {
 	DataDir    string
 	CfgFile    string
 	DefaultKey string
 	Verbose    bool
+	Color      bool
 }
 
 // Init sets up the data directory if it doesn't exist, checks the permissions
 // of the directory and configuration file.
-func Init() (cfg *Config) {
+func Init() (s *Signr) {
 
-	cfg = &Config{}
+	s = &Signr{}
 
-	cfg.DataDir = appdata.GetDataDir(AppName, false)
+	s.DataDir = appdata.GetDataDir(AppName, false)
 
-	fi, exists, err := CheckFileExists(cfg.DataDir)
+	fi, exists, err := CheckFileExists(s.DataDir)
 
-	cfg.CfgFile = cfg.GetCfgFilename()
+	s.CfgFile = s.GetCfgFilename()
 
 	if !exists {
-		PrintErr("First run: Creating signr data directory at %s\n\n",
-			cfg.DataDir)
+		s.PrintErr("First run: Creating signr data directory at %s\n\n",
+			s.DataDir)
 
-		if err = os.MkdirAll(cfg.DataDir, DataDirPerm); err != nil {
-			Fatal("unable to create data dir, cannot proceed\n")
+		if err = os.MkdirAll(s.DataDir, DataDirPerm); err != nil {
+			s.Fatal("unable to create data dir, cannot proceed\n")
 		}
 
 		// Touch the config file so it is ready to write to.
-		os.WriteFile(cfg.CfgFile, []byte{}, ConfigFilePerm)
+		os.WriteFile(s.CfgFile, []byte{}, ConfigFilePerm)
 
 		// check the permissions
 	} else if fi.Mode().Perm()&DataFileMask != 0 {
@@ -44,15 +45,15 @@ func Init() (cfg *Config) {
 			"data directory %s has insecure permissions %s"+
 				" recommended to restore it to %s (0%o), "+
 				"and investigate how it got changed",
-			cfg.DataDir, fi.Mode().Perm(),
+			s.DataDir, fi.Mode().Perm(),
 			DataDirPerm, DataDirPerm)
 
-		Fatal("ERROR: '%s'\n", err)
+		s.Fatal("ERROR: '%s'\n", err)
 	}
 
-	if fi, err = os.Stat(cfg.CfgFile); err != nil {
-		Fatal("Unexpected error probing config file %s: '%s'\n",
-			cfg.CfgFile, err)
+	if fi, err = os.Stat(s.CfgFile); err != nil {
+		s.Fatal("Unexpected error probing config file %s: '%s'\n",
+			s.CfgFile, err)
 	}
 
 	// check configuration permissions
@@ -62,11 +63,11 @@ func Init() (cfg *Config) {
 			"configuration file %s has insecure permissions %s (0%o)"+
 				" recommended to restore it to %s (0%o), "+
 				"and investigate how it got changed",
-			cfg.CfgFile, fi.Mode().Perm(), fi.Mode().Perm(),
+			s.CfgFile, fi.Mode().Perm(), fi.Mode().Perm(),
 			ConfigFilePerm, ConfigFilePerm)
 
-		Fatal("ERROR: %s\n", err)
+		s.Fatal("ERROR: %s\n", err)
 	}
 
-	return cfg
+	return s
 }

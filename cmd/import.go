@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/mleku/signr/pkg/signr"
 	"github.com/spf13/cobra"
 )
 
@@ -16,10 +15,10 @@ var importCmd = &cobra.Command{
 		argLen := len(args)
 		if argLen == 1 {
 
-			signr.Fatal("a key name is required after the secret key")
+			cfg.Fatal("a key name is required after the secret key")
 		}
 		if err := cfg.Import(args[0], args[1]); err != nil {
-			signr.Fatal("ERROR: while importing: '%s'\n", err)
+			cfg.Fatal("ERROR: while importing: '%s'\n", err)
 		}
 	},
 }
