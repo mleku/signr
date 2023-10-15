@@ -44,6 +44,7 @@ func init() {
 	signCmd.PersistentFlags().BoolVarP(&Hex, "hex", "x", false,
 		"print signature in hex")
 	signCmd.PersistentFlags().BoolVarP(&OnlySig, "sigonly", "s", false,
-		"print only signature")
+		"print only signature - note: this also omits the adding of a " +
+		"nonce as a verifier could not know it")
 	rootCmd.AddCommand(signCmd)
 }

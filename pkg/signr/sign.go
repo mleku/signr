@@ -8,8 +8,6 @@ import (
 	"github.com/mleku/ec/schnorr"
 	secp "github.com/mleku/ec/secp"
 	"github.com/mleku/signr/pkg/nostr"
-	"io"
-	"os"
 	"strings"
 )
 
@@ -18,7 +16,7 @@ import (
 // By default the signature includes all of the prefix text that was also used
 // to generate the hash to sign on, for namespacing, which follows the format:
 //
-// 		signr_0_SHA256_SCHNORR_
+//	signr_0_SHA256_SCHNORR_
 //
 // which is always present. After this can be a custom string, that is sanitised
 // and all whitespaces between its characters are changed to hyphens, to provide
@@ -95,12 +93,17 @@ func (s *Signr) Sign(args []string, pass, custom string,
 
 	var skipRandomness bool
 
+	if sigOnly {
+		skipRandomness = true
+	}
+
 	// if the command line contains a raw hash we assume that a simple
 	// signature on this is intended. it will still use the namespacing, the
 	// pubkey and any custom string, but not the nonce. it is assumed that
 	// the protocol generating the hash has accounted for sufficient
 	// entropy.
 	var sum []byte
+
 	if len(filename) == 64 {
 
 		sum, err = hex.DecodeString(filename)
@@ -108,6 +111,13 @@ func (s *Signr) Sign(args []string, pass, custom string,
 			skipRandomness = true
 		}
 
+	}
+
+	if len(sum) == 0 {
+
+		if sum, err = HashFile(filename); err != nil {
+			s.Fatal("error while generating hash on file/input: %s\n", err)
+		}
 	}
 
 	if !skipRandomness {
@@ -122,43 +132,6 @@ func (s *Signr) Sign(args []string, pass, custom string,
 		}
 
 		signingStrings = append(signingStrings, hex.EncodeToString(nonce))
-
-		var f io.ReadCloser
-
-		switch {
-		case filename == "-":
-
-			// read from stdin
-			f = os.Stdin
-
-		default:
-
-			f, err = os.Open(filename)
-			if err != nil {
-				err = fmt.Errorf("ERROR: unable to open file: '%s'\n\n", err)
-				return
-			}
-
-			defer func(f io.ReadCloser) {
-				err := f.Close()
-				if err != nil {
-					err = fmt.Errorf("ERROR: '%s'\n", err)
-					return
-				}
-			}(f)
-
-		}
-		h := sha256.New()
-
-		if _, err = io.Copy(h, f); err != nil {
-			err = fmt.Errorf(
-				"ERROR: unable to read file to generate hash: '%s'\n\n",
-				err)
-			return
-		}
-
-		sum = h.Sum(nil)
-
 	}
 
 	// add the public key. This must always be present as it isolates
@@ -219,7 +192,8 @@ func (s *Signr) Sign(args []string, pass, custom string,
 		}
 		return
 
-	} else if sigOnly {
+	}
+	if sigOnly {
 
 		if asHex {
 
@@ -238,6 +212,7 @@ func (s *Signr) Sign(args []string, pass, custom string,
 
 		return
 	}
+
 	sigStr, err = FormatSig(signingStrings, sig)
 	if err != nil {
 
