@@ -16,7 +16,7 @@ func (s *Signr) Gen(name string) {
 
 		secBytes := sec.Serialize()
 
-		npub, _ := nostr.PublicKeyToString(pub)
+		npub, _ := nostr.PublicKeyToNpub(pub)
 
 		if s.Verbose {
 
@@ -31,7 +31,7 @@ func (s *Signr) Gen(name string) {
 				hex.EncodeToString(pubBytes),
 			)
 
-			nsec, _ := nostr.SecretKeyToString(sec)
+			nsec, _ := nostr.SecretKeyToNsec(sec)
 			s.PrintErr(
 				"nostr:\n"+
 					"\tsecret: %s\n"+

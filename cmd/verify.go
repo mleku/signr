@@ -118,7 +118,7 @@ use the filename '-' to indicate the file is being piped in via stdin.`,
 
 		// decode the public key
 		var pk *secp.PublicKey
-		pk, err = nostr.DecodePublicKey(pubkey)
+		pk, err = nostr.NpubToPublicKey(pubkey)
 
 		// verify the hash and the signature match the public key
 		if sig.Verify(messageHash[:], pk) {

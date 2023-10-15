@@ -10,20 +10,25 @@ import (
 const (
 	SecHRP = "nsec"
 	PubHRP = "npub"
-	SigHRP = "sig"
+	SigHRP = "nsig"
 )
 
+// ConvertForBech32 performs the bit expansion required for encoding into
+// Bech32.
 func ConvertForBech32(b8 []byte) (b5 []byte, err error) {
 
 	return bech32.ConvertBits(b8, 8, 5, true)
 }
 
+// ConvertFromBech32 collapses together the bit expanded 5 bit numbers encoded
+// in bech32.
 func ConvertFromBech32(b5 []byte) (b8 []byte, err error) {
 
 	return bech32.ConvertBits(b5, 5, 8, true)
 }
 
-func SecretKeyToString(sk *secp.SecretKey) (encoded string, err error) {
+// SecretKeyToNsec encodes an secp256k1 secret key as a Bech32 string (nsec).
+func SecretKeyToNsec(sk *secp.SecretKey) (encoded string, err error) {
 
 	var b5 []byte
 	if b5, err = ConvertForBech32(sk.Serialize()); err != nil {
@@ -33,7 +38,8 @@ func SecretKeyToString(sk *secp.SecretKey) (encoded string, err error) {
 	return bech32.Encode(SecHRP, b5)
 }
 
-func PublicKeyToString(pk *secp.PublicKey) (encoded string, err error) {
+// PublicKeyToNpub encodes a public kxey as a bech32 string (npub).
+func PublicKeyToNpub(pk *secp.PublicKey) (encoded string, err error) {
 
 	var bits5 []byte
 	if bits5, err = ConvertForBech32(schnorr.SerializePubKey(pk)); err != nil {
@@ -43,7 +49,9 @@ func PublicKeyToString(pk *secp.PublicKey) (encoded string, err error) {
 	return bech32.Encode(PubHRP, bits5)
 }
 
-func DecodeSecretKey(encoded string) (sk *secp.SecretKey, err error) {
+// NsecToSecretKey decodes a nostr secret key (nsec) and returns the secp256k1
+// secret key.
+func NsecToSecretKey(encoded string) (sk *secp.SecretKey, err error) {
 
 	var b5, b8 []byte
 	var hrp string
@@ -66,7 +74,9 @@ func DecodeSecretKey(encoded string) (sk *secp.SecretKey, err error) {
 	return
 }
 
-func DecodePublicKey(encoded string) (pk *secp.PublicKey, err error) {
+// NpubToPublicKey decodes an nostr public key (npub) and returns an secp256k1
+// public key.
+func NpubToPublicKey(encoded string) (pk *secp.PublicKey, err error) {
 
 	var b5, b8 []byte
 	var hrp string
@@ -92,6 +102,8 @@ func DecodePublicKey(encoded string) (pk *secp.PublicKey, err error) {
 	return schnorr.ParsePubKey(b8[:32])
 }
 
+// EncodeSignature encodes a schnorr signature as Bech32 with the HRP "nsig" to
+// be consistent with the key encodings 4 characters starting with 'n'.
 func EncodeSignature(sig *schnorr.Signature) (str string, err error) {
 
 	var b5 []byte
@@ -106,6 +118,8 @@ func EncodeSignature(sig *schnorr.Signature) (str string, err error) {
 	return
 }
 
+// DecodeSignature decodes a Bech32 encoded nsig nostr (schnorr) signature into
+// its runtime binary form.
 func DecodeSignature(encoded string) (sig *schnorr.Signature, err error) {
 
 	var b5, b8 []byte

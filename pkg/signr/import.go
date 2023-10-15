@@ -14,7 +14,7 @@ func (s *Signr) Import(secKey, name string) (err error) {
 	var sec *secp.SecretKey
 	if strings.HasPrefix(secKey, nostr.SecHRP) {
 
-		if sec, err = nostr.DecodeSecretKey(secKey); err != nil {
+		if sec, err = nostr.NsecToSecretKey(secKey); err != nil {
 
 			err = fmt.Errorf("ERROR: while decoding key: '%v'", err)
 		}
@@ -41,7 +41,7 @@ func (s *Signr) Import(secKey, name string) (err error) {
 	pub := sec.PubKey()
 	secBytes := sec.Serialize()
 
-	npub, _ := nostr.PublicKeyToString(pub)
+	npub, _ := nostr.PublicKeyToNpub(pub)
 
 	if s.Verbose {
 
@@ -54,7 +54,7 @@ func (s *Signr) Import(secKey, name string) (err error) {
 			hex.EncodeToString(pubBytes),
 		)
 
-		nsec, _ := nostr.SecretKeyToString(sec)
+		nsec, _ := nostr.SecretKeyToNsec(sec)
 
 		s.PrintErr("nostr:\n"+
 			"\tsecret: %s\n"+

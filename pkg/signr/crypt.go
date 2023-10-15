@@ -117,7 +117,7 @@ func (s *Signr) DeriveAndCheckKey(name string,
 	pub := sec.PubKey()
 
 	pubBytes := schnorr.SerializePubKey(pub)
-	npub, _ := nostr.PublicKeyToString(pub)
+	npub, _ := nostr.PublicKeyToNpub(pub)
 
 	// check the decrypted secret generates the stored pubkey
 	pubBytes, err = s.ReadFile(name + "." + PubExt)
