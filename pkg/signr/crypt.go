@@ -11,11 +11,11 @@ import (
 	"strings"
 )
 
-const UnlockPrompt = "type password to unlock encrypted secret key: "
+const UnlockPrompt = "type password to unlock encrypted secret key"
 
 // GetKey scans the keychain for a named key, with optional password string to
 // decrypt the key in the file in the keychain.
-func (s *Signr) GetKey(name, pass string) (key *secp256k1.SecretKey,
+func (s *Signr) GetKey(name, passStr string) (key *secp256k1.SecretKey,
 	err error) {
 
 	var keyBytes []byte
@@ -56,48 +56,33 @@ func (s *Signr) GetKey(name, pass string) (key *secp256k1.SecretKey,
 	originalSecret := keyBytes[:32]
 
 	secret := make([]byte, 32)
-	copy(secret, originalSecret)
 
-	if pass != "" {
+	if passStr != "" {
+		copy(secret, originalSecret)
 		if key, err = s.DeriveAndCheckKey(name, secret,
-			[]byte(pass)); err != nil {
+			[]byte(passStr)); err != nil {
 
 			s.PrintErr("password failed to unlock key: %s\n", err)
 
 			return
 		}
-		// actualKey := ArgonKey([]byte(pass))
-		//
-		// secret = XOR(secret, actualKey)
-		//
-		// sec := secp256k1.SecKeyFromBytes(secret)
-		// pub := sec.PubKey()
-		//
-		// pubBytes := schnorr.SerializePubKey(pub)
-		// npub, _ := nostr.PublicKeyToString(pub)
-		//
-		// // check the decrypted secret yields the stored pubkey
-		// pubBytes, err = s.ReadFile(name + "." + PubExt)
-		// npubReal := strings.TrimSpace(string(pubBytes))
-		//
-		// if npub != npubReal {
-		//
-		// 	PrintErr("password failed to unlock key\n", err)
-		// 	return
-		//
-		// } else {
-		//
-		// 	key = sec
-		// 	return
-		// }
+
 	}
+
+	var pass []byte
 
 	if encrypted {
 
 		var tryCount int
+		retryStr := ""
 		for tryCount < 3 {
 
-			pass, err := s.PasswordEntry(UnlockPrompt, 0)
+			copy(secret, originalSecret)
+			if tryCount > 0 {
+				retryStr = fmt.Sprintf(" (attempt %d of %d)", tryCount, 3)
+			}
+			unlockPrompt := fmt.Sprintf("%s%s:", UnlockPrompt, retryStr)
+			pass, err = s.PasswordEntry(unlockPrompt, 0)
 			if err != nil {
 				s.PrintErr(
 					"error in password input: '%s'\n", err)
@@ -112,31 +97,6 @@ func (s *Signr) GetKey(name, pass string) (key *secp256k1.SecretKey,
 				break
 			}
 
-			// actualKey := ArgonKey(pass)
-			//
-			// secret = XOR(secret, actualKey)
-			//
-			// sec := secp256k1.SecKeyFromBytes(secret)
-			// pub := sec.PubKey()
-			//
-			// pubBytes := schnorr.SerializePubKey(pub)
-			// npub, _ := nostr.PublicKeyToString(pub)
-			//
-			// // check the decrypted secret generates the stored pubkey
-			// pubBytes, err = s.ReadFile(name + "." + PubExt)
-			// npubReal := strings.TrimSpace(string(pubBytes))
-			//
-			// if npub != npubReal {
-			// 	PrintErr("ERROR: %s, password failed to unlock key, try again\n",
-			// 		err)
-			// 	tryCount++
-			// 	continue
-			//
-			// } else {
-			//
-			// 	key = sec
-			// 	break
-			// }
 		}
 
 	} else {
