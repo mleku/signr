@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
 )
 
 const (
@@ -27,6 +28,7 @@ func (s *Signr) GetCfgFilename() string {
 }
 
 func GetDefaultSigningStrings() (signingStrings []string) {
+
 	// for now the first 4 are always the same
 	signingStrings = []string{
 		"signr", "0", "SHA256", "SCHNORR",
@@ -39,20 +41,35 @@ func AddCustom(ss []string, Custom string) (signingStrings []string) {
 	// Add the custom protocol string to the base if provided:
 	if Custom != "" {
 
+		// eliminate all non-printable characters first
+		Custom = strings.Map(func(r rune) rune {
+			if unicode.IsPrint(r) {
+				return r
+			}
+			return ' '
+		}, Custom)
+
+		// all multiple non-printables then should be collapsed to single.
+		Custom = strings.Replace(Custom, "  ", " ", -1)
+
 		// leading and following space characters are removed
-		Custom := strings.TrimSpace(Custom)
+		Custom = strings.TrimSpace(Custom)
 
 		// spaces are not permitted in custom string, but they could be
 		// added, so they will be replaced with hyphens, as are underscores.
 		Custom = strings.ReplaceAll(Custom, " ", "-")
-		Custom = strings.ReplaceAll(Custom, "\n", "-")
-		Custom = strings.ReplaceAll(Custom, "_", "-")
 
+		// no matter the variation of non-printable characters in the string so
+		// long as the printable characters and the positions of their
+		// interstitial spaces will be canonical.
 		signingStrings = append(signingStrings, Custom)
 	}
 
 	return
 }
+
+
+
 
 func FormatSig(signingStrings []string, sig *schnorr.Signature) (str string,
 	err error) {
@@ -101,4 +118,3 @@ func (s *Signr) Fatal(format string, a ...interface{}) {
 func (s *Signr) PrintErr(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(os.Stderr, format, a...)
 }
-

@@ -1,16 +1,9 @@
 package cmd
 
 import (
-	"encoding/hex"
 	"fmt"
-	"github.com/minio/sha256-simd"
-	"github.com/mleku/ec/schnorr"
-	secp "github.com/mleku/ec/secp"
-	"github.com/mleku/signr/pkg/nostr"
-	"github.com/mleku/signr/pkg/signr"
 	"github.com/spf13/cobra"
-	"os"
-	"strings"
+	"github.com/spf13/viper"
 )
 
 var PubKey string
@@ -23,7 +16,12 @@ var verifyCmd = &cobra.Command{
 
 the public key is embedded in the signature should also match the key expected to be used on the signature.
 
-use the filename '-' to indicate the file is being piped in via stdin.`,
+use the filename '-' to indicate the file is being piped in via stdin.
+
+if the signature is a signature-only, whether as a parameter or in the referenced file, the pubkey must be provided by parameter or environment variable.
+
+if the consuming protocol requires an additional custom namespace, and was used when making a signature only, it must be passed in to construct the correct signing material for the message hash to check the signature against.		
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) < 2 {
@@ -33,112 +31,38 @@ use the filename '-' to indicate the file is being piped in via stdin.`,
 		filename := args[0]
 		sigOrSigFile := args[1]
 
-		var signingStrings []string
+		cfg.Log("pubkey input: %s\n", PubKey)
+
+		// if we didn't get a pubkey string, scan env for it.
+		if PubKey == "" {
+
+			PubKey = viper.GetString("pubkey")
+			cfg.Log("pubkey from env: %s\n", PubKey)
+
+		}
+
+		var valid bool
 		var err error
+		valid, err = cfg.Verify(filename, sigOrSigFile, PubKey, Custom)
 
-		// if the parameter appears to be a signature, use it directly
-		if strings.HasPrefix(sigOrSigFile, "signr_0_SHA256_SCHNORR_") {
-
-			signingStrings = strings.Split(sigOrSigFile, "_")
-
-		} else {
-
-			var data []byte
-
-			data, err = os.ReadFile(sigOrSigFile)
-			if err != nil {
-				cfg.Fatal(
-					"ERROR: reading file '%s': %v\n", sigOrSigFile, err)
-			}
-
-			signingStrings = strings.Split(string(data), "_")
-		}
-		var sum []byte
-
-		if sum, err = signr.HashFile(filename); err != nil {
-			cfg.Fatal("error while generating hash on file/input: %s\n", err)
-		}
-
-		// var f io.ReadCloser
-		// switch {
-		// case filename == "-":
-		//
-		// 	// read from stdin
-		// 	f = os.Stdin
-		//
-		// default:
-		//
-		// 	// read from the named file
-		// 	f, err = os.Open(filename)
-		// 	if err != nil {
-		// 		cfg.Fatal(
-		// 			"ERROR: unable to open file: '%s'\n\n", err)
-		// 	}
-		//
-		// 	defer func(f io.ReadCloser) {
-		// 		err := f.Close()
-		// 		if err != nil {
-		// 			cfg.Fatal("ERROR: closing file '%s'\n", err)
-		// 		}
-		// 	}(f)
-		//
-		// }
-		//
-		// h := sha256.New()
-		//
-		// // feed the file data through the hasher
-		// if _, err := io.Copy(h, f); err != nil {
-		// 	cfg.Fatal(
-		// 		"ERROR: unable to read file to generate hash: '%s'\n\n", err)
-		// }
-		// sum := h.Sum(nil)
-
-		// clean up the signature
-		signature := strings.TrimSpace(signingStrings[len(signingStrings)-1])
-
-		// get the public key
-		pubkey := signingStrings[len(signingStrings)-2]
-
-		// trim off the signature part from the signature
-		signingStrings = signingStrings[:len(signingStrings)-1]
-
-		// add the hash of the file in place
-		signingStrings = append(signingStrings, hex.EncodeToString(sum))
-
-		// generate the signing material
-		message := strings.Join(signingStrings, "_")
-
-		// hash the signing material
-		messageHash := sha256.Sum256([]byte(message))
-
-		// decode the signature
-		var sig *schnorr.Signature
-		sig, err = nostr.DecodeSignature(signature)
 		if err != nil {
 
-			cfg.Fatal("ERROR: decoding signature '%s'\n", err)
+			cfg.Fatal("error verifying signature: %s\n", err)
 		}
 
-		// decode the public key
-		var pk *secp.PublicKey
-		pk, err = nostr.NpubToPublicKey(pubkey)
+		var validity = map[bool]string{true: "VALID", false: "INVALID"}
 
-		// verify the hash and the signature match the public key
-		if sig.Verify(messageHash[:], pk) {
-
-			fmt.Println("VALID")
-
-		} else {
-
-			fmt.Println("INVALID")
-		}
+		fmt.Println(validity[valid])
 	},
 }
 
 func init() {
-	verifyCmd.PersistentFlags().StringVar(&PubKey, "pubkey", "",
+
+	verifyCmd.PersistentFlags().StringVarP(&PubKey, "pubkey", "p", "",
 		"public key to check with if custom protocol omits it from the output")
+
 	verifyCmd.PersistentFlags().StringVarP(&Custom, "custom", "k", "",
 		"custom additional namespace")
+
 	rootCmd.AddCommand(verifyCmd)
 }
