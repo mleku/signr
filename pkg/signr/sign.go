@@ -1,7 +1,6 @@
 package signr
 
 import (
-	"crypto/rand"
 	"encoding/hex"
 	"fmt"
 	"github.com/minio/sha256-simd"
@@ -89,7 +88,7 @@ func (s *Signr) Sign(args []string, pass, custom string,
 
 	signingStrings := GetDefaultSigningStrings()
 
-	signingStrings = AddCustom(signingStrings, custom)
+	signingStrings = s.AddCustom(signingStrings, custom)
 
 	var skipRandomness bool
 
@@ -123,15 +122,15 @@ func (s *Signr) Sign(args []string, pass, custom string,
 	if !skipRandomness {
 
 		// add the signature nonce
-		nonce := make([]byte, 8)
-
-		_, err = rand.Read(nonce)
+		var nonce string
+		nonce, err = s.GetNonceHex()
 		if err != nil {
+
 			err = fmt.Errorf("ERROR: '%s'\n\n", err)
 			return
 		}
 
-		signingStrings = append(signingStrings, hex.EncodeToString(nonce))
+		signingStrings = append(signingStrings, nonce)
 	}
 
 	// add the public key. This must always be present as it isolates

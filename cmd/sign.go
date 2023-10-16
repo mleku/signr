@@ -42,12 +42,16 @@ func init() {
 	signCmd.PersistentFlags().StringVarP(&Pass, "pass", "p", "",
 		"password to unlock the key - for better security, use the " +
 		"environment variable")
+
 	signCmd.PersistentFlags().StringVarP(&Custom, "custom", "k", "",
 		"custom additional namespace")
+
 	signCmd.PersistentFlags().BoolVarP(&Hex, "hex", "x", false,
 		"print signature in hex - this also applies the same effect as sigonly")
+
 	signCmd.PersistentFlags().BoolVarP(&OnlySig, "sigonly", "s", false,
 		"print only signature - note: this also omits the adding of a " +
 		"nonce as a verifier could not know it")
+
 	rootCmd.AddCommand(signCmd)
 }

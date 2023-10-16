@@ -7,7 +7,10 @@ import (
 var genCmd = &cobra.Command{
 	Use:   "gen <name>",
 	Short: "Generate a new nostr key",
-	Long:  `Generates a new key saves it into the application data directory as part of the keychain.`,
+	Long:  `Generates a new key saves it into the application data directory as part of the keychain.
+
+the name should be relevant to the purpose of the key, cannot contain any non-printable characters or white space, and any such name will be rejected.
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) < 1 {

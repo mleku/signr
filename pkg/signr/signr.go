@@ -1,6 +1,8 @@
 package signr
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"github.com/gookit/color"
 	"github.com/mleku/ec/schnorr"
@@ -135,4 +137,20 @@ func (s *Signr) Fatal(format string, a ...interface{}) {
 
 func (s *Signr) PrintErr(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(os.Stderr, format, a...)
+}
+
+func (s *Signr) GetNonceHex() (nonceHex string, err error) {
+
+	// add the signature nonce
+	nonce := make([]byte, 8)
+
+	_, err = rand.Read(nonce)
+	if err != nil {
+
+		err = fmt.Errorf("error getting entropy: %s\n", err)
+		return
+	}
+
+	nonceHex = hex.EncodeToString(nonce)
+	return
 }

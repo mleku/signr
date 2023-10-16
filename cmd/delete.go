@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 )
 
@@ -14,10 +13,16 @@ var deleteCmd = &cobra.Command{
 to actually delete a key, you must manually delete it in the filesystem. the files are written read only so the filesystem will double check you want to do it.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("delete called")
 
+		if len(args)<1 {
 
-		// os.Rename()
+			s.Fatal("key name is required\n")
+		}
+
+		err := s.Delete(args[0])
+		if err != nil {
+			s.PrintErr("error deleting key '%s': %s\n", err)
+		}
 	},
 }
 
