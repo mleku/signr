@@ -36,28 +36,19 @@ func GetDefaultSigningStrings() (signingStrings []string) {
 	return
 }
 
-func AddCustom(ss []string, Custom string) (signingStrings []string) {
+func (s *Signr) AddCustom(ss []string,
+	Custom string) (signingStrings []string) {
 	signingStrings = ss
 	// Add the custom protocol string to the base if provided:
 	if Custom != "" {
 
-		// eliminate all non-printable characters first
-		Custom = strings.Map(func(r rune) rune {
-			if unicode.IsPrint(r) {
-				return r
-			}
-			return ' '
-		}, Custom)
+		var err error
+		Custom, err = s.Sanitize(Custom)
 
-		// all multiple non-printables then should be collapsed to single.
-		Custom = strings.Replace(Custom, "  ", " ", -1)
-
-		// leading and following space characters are removed
-		Custom = strings.TrimSpace(Custom)
-
-		// spaces are not permitted in custom string, but they could be
-		// added, so they will be replaced with hyphens, as are underscores.
-		Custom = strings.ReplaceAll(Custom, " ", "-")
+		if err != nil {
+			s.Log("error sanitizing custom string: %s\n", err)
+			return ss
+		}
 
 		// no matter the variation of non-printable characters in the string so
 		// long as the printable characters and the positions of their
@@ -68,8 +59,35 @@ func AddCustom(ss []string, Custom string) (signingStrings []string) {
 	return
 }
 
+// Sanitize replaces all nonprintable characters with spaces, eliminates spaces
+// more than 1 character in a row, removes leading and following spaces and
+// finally replaces all remaining interstitial spaces with hyphens.
+func (s *Signr) Sanitize(in string) (out string, err error) {
 
+	// eliminate all non-printable characters first
+	in = strings.Map(func(r rune) rune {
+		if unicode.IsPrint(r) {
+			return r
+		}
+		return ' '
+	}, in)
 
+	// all multiple non-printables then should be collapsed to single.
+	in = strings.Replace(in, "  ", " ", -1)
+
+	// leading and following space characters are removed
+	in = strings.TrimSpace(in)
+
+	// spaces are not permitted in custom string, but they could be
+	// added, so they will be replaced with hyphens, as are underscores.
+	in = strings.ReplaceAll(in, " ", "-")
+
+	if len(in) < 1 {
+		err = fmt.Errorf("empty string after sanitizing")
+	}
+
+	return
+}
 
 func FormatSig(signingStrings []string, sig *schnorr.Signature) (str string,
 	err error) {

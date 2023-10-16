@@ -9,10 +9,25 @@ var genCmd = &cobra.Command{
 	Short: "Generate a new nostr key",
 	Long:  `Generates a new key saves it into the application data directory as part of the keychain.`,
 	Run: func(cmd *cobra.Command, args []string) {
+
 		if len(args) < 1 {
-			cfg.Fatal("key name is required")
+			s.Fatal("key name is required")
 		}
-		cfg.Gen(args[0])
+
+		keyName := args[0]
+
+		var err error
+		keyName, err = s.Sanitize(keyName)
+		if err != nil {
+			s.Fatal("key name failed sanitizing: %s\n", keyName)
+		}
+
+		if keyName == args[0] {
+
+			s.Fatal("key name input is invalid - sanitizing it changed it\n")
+		}
+
+		s.Gen(keyName)
 	},
 }
 

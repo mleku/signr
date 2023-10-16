@@ -24,10 +24,10 @@ The sigonly option is the same as the hex option except the output signature is 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		signature, err := cfg.Sign(args, Pass, Custom, Hex, OnlySig)
+		signature, err := s.Sign(args, Pass, Custom, Hex, OnlySig)
 		if err != nil {
 
-			cfg.Err("ERROR: while signing: %s\n", err)
+			s.Err("ERROR: while signing: %s\n", err)
 		} else {
 
 			fmt.Println(signature)

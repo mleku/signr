@@ -17,16 +17,16 @@ either fingerprint or key name can be used to identify the key intended.
 
 		if len(args) < 1 {
 
-			cfg.Log(
+			s.Log(
 				"ERROR: default key must be named.\n\n" +
 					"here are the options:\n\n")
 
 			listkeysCmd.Run(cmd, args)
-			cfg.Fatal("\n")
+			s.Fatal("\n")
 		}
 
-		if err := cfg.SetDefault(args[0]);err != nil {
-			cfg.Err("%s\n", err)
+		if err := s.SetDefault(args[0]);err != nil {
+			s.Err("%s\n", err)
 			return
 		}
 

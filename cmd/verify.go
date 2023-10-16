@@ -25,29 +25,29 @@ if the consuming protocol requires an additional custom namespace, and was used 
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) < 2 {
-			cfg.Fatal("ERROR: at minimum a file and a keyfile name must be specified\n\n")
+			s.Fatal("ERROR: at minimum a file and a keyfile name must be specified\n\n")
 		}
 
 		filename := args[0]
 		sigOrSigFile := args[1]
 
-		cfg.Log("pubkey input: %s\n", PubKey)
+		s.Log("pubkey input: %s\n", PubKey)
 
 		// if we didn't get a pubkey string, scan env for it.
 		if PubKey == "" {
 
 			PubKey = viper.GetString("pubkey")
-			cfg.Log("pubkey from env: %s\n", PubKey)
+			s.Log("pubkey from env: %s\n", PubKey)
 
 		}
 
 		var valid bool
 		var err error
-		valid, err = cfg.Verify(filename, sigOrSigFile, PubKey, Custom)
+		valid, err = s.Verify(filename, sigOrSigFile, PubKey, Custom)
 
 		if err != nil {
 
-			cfg.Fatal("error verifying signature: %s\n", err)
+			s.Fatal("error verifying signature: %s\n", err)
 		}
 
 		var validity = map[bool]string{true: "VALID", false: "INVALID"}

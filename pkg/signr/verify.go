@@ -68,7 +68,7 @@ func (s *Signr) Verify(filename, sigOrSigFile, PubKey,
 
 	if Custom != "" {
 		// if a custom protocol field is specified, it goes before the pubkey:
-		signingStrings = AddCustom(signingStrings, Custom)
+		signingStrings = s.AddCustom(signingStrings, Custom)
 	}
 
 	// if a nonce was present in the signature, it must be added to the signing

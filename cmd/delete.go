@@ -15,6 +15,8 @@ to actually delete a key, you must manually delete it in the filesystem. the fil
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("delete called")
+
+
 		// os.Rename()
 	},
 }

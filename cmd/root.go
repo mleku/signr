@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfg *signr.Signr
+var s *signr.Signr
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -23,18 +23,18 @@ Designed to function in a similar way to ssh-keygen in that it keeps the keychai
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		cfg.Fatal("%s\n", err)
+		s.Fatal("%s\n", err)
 	}
 }
 
 func init() {
 
-	cfg = signr.Init()
-	rootCmd.PersistentFlags().BoolVarP(&cfg.Verbose,
+	s = signr.Init()
+	rootCmd.PersistentFlags().BoolVarP(&s.Verbose,
 		"verbose", "v", false, "prints more things")
-	rootCmd.PersistentFlags().BoolVarP(&cfg.Color,
+	rootCmd.PersistentFlags().BoolVarP(&s.Color,
 		"color", "c", false, "prints more things")
-	cobra.OnInitialize(initConfig(cfg))
+	cobra.OnInitialize(initConfig(s))
 }
 
 // initConfig reads in config file and ENV variables if set.
