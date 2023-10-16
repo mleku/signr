@@ -11,6 +11,7 @@ func (s *Signr) Delete(name string) (err error) {
 	var grid [][]string
 	grid, _, err = s.GetList(nil)
 	for i := range grid {
+
 		if grid[i][0] == name {
 
 			// generate random nonce to ensure no collisions are possible (ie,
@@ -44,5 +45,6 @@ func (s *Signr) Delete(name string) (err error) {
 	// key name was not found
 	err = fmt.Errorf("key named '%s' not found in keychain; "+
 		"use signr listkeys to see list of keys in keychain", name)
+
 	return
 }

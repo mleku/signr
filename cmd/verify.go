@@ -8,6 +8,8 @@ import (
 
 var PubKey string
 
+var validity = map[bool]string{true: "VALID", false: "INVALID"}
+
 // verifyCmd represents the verify command
 var verifyCmd = &cobra.Command{
 	Use:   "verify <file> <signature file/signature>",
@@ -37,8 +39,11 @@ if the consuming protocol requires an additional custom namespace, and was used 
 		if PubKey == "" {
 
 			PubKey = viper.GetString("pubkey")
-			s.Log("pubkey from env: %s\n", PubKey)
 
+			if PubKey == "" {
+
+				s.Log("pubkey from env: %s\n", PubKey)
+			}
 		}
 
 		var valid bool
@@ -49,8 +54,6 @@ if the consuming protocol requires an additional custom namespace, and was used 
 
 			s.Fatal("error verifying signature: %s\n", err)
 		}
-
-		var validity = map[bool]string{true: "VALID", false: "INVALID"}
 
 		fmt.Println(validity[valid])
 	},

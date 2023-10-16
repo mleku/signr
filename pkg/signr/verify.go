@@ -13,28 +13,25 @@ import (
 func (s *Signr) Verify(filename, sigOrSigFile, PubKey,
 	Custom string) (valid bool, err error) {
 
-	var pubKey, sumHex, nonce, pubkeyInSig string
+	var pubKey, sumHex, nonce, pkInSig string
 	var signingStrings []string
 	var sig *schnorr.Signature
 	var sum []byte
 
 	pubKey = PubKey
 
-	sum, err = HashFile(filename)
-	if err != nil {
+	if sum, err = HashFile(filename); err != nil {
 
-		err = fmt.Errorf("error getting hash of file/input: %s\n", err)
+		err = fmt.Errorf("error getting hash of file/input: %s", err)
 		return
 	}
 
 	sumHex = hex.EncodeToString(sum)
 
-	sig, pubkeyInSig, nonce = s.RecogniseSig(sigOrSigFile)
+	if sig, pkInSig, nonce = s.RecogniseSig(sigOrSigFile); pkInSig != "" {
 
-	if pubkeyInSig != "" {
-
-		s.Log("pubkeyInSig : %s\n", pubkeyInSig)
-		pubKey = pubkeyInSig
+		s.Log("pubkey in signature: %s\n", pkInSig)
+		pubKey = pkInSig
 	}
 	s.Log("loading pubkey: %s\n", pubKey)
 
@@ -45,21 +42,19 @@ func (s *Signr) Verify(filename, sigOrSigFile, PubKey,
 		var data []byte
 		data, err = s.ReadFile(sigOrSigFile)
 
-		sig, pubkeyInSig, nonce = s.RecogniseSig(string(data))
+		sig, pkInSig, nonce = s.RecogniseSig(string(data))
 
-		if pubkeyInSig != "" {
+		if pkInSig != "" {
 
-			s.Log("pubkeyInSig : %s\n", pubkeyInSig)
-			pubKey = pubkeyInSig
+			s.Log("pubkey in signature: %s\n", pkInSig)
+			pubKey = pkInSig
 		}
 	}
 
 	// decode the public key
 	var pk *secp.PublicKey
-	pk, err = nostr.NpubToPublicKey(pubKey)
-	if err != nil {
+	if pk, err = nostr.NpubToPublicKey(pubKey); err != nil {
 
-		s.Log("decoding pubkey: %s\n", pubKey)
 		err = fmt.Errorf("error decoding pubkey: %s\n", err)
 		return
 	}
@@ -67,6 +62,8 @@ func (s *Signr) Verify(filename, sigOrSigFile, PubKey,
 	signingStrings = GetDefaultSigningStrings()
 
 	if Custom != "" {
+
+		s.Log("adding custom namespace %s\n", Custom)
 		// if a custom protocol field is specified, it goes before the pubkey:
 		signingStrings = s.AddCustom(signingStrings, Custom)
 	}
@@ -74,6 +71,8 @@ func (s *Signr) Verify(filename, sigOrSigFile, PubKey,
 	// if a nonce was present in the signature, it must be added to the signing
 	// material
 	if nonce != "" {
+
+		s.Log("adding nonce %s\n", Custom)
 		signingStrings = append(signingStrings, nonce)
 	}
 
@@ -114,15 +113,21 @@ func (s *Signr) RecogniseSig(possibleSig string) (sig *schnorr.Signature,
 
 		// scan for the possible pubkey segment and add to returns it if found.
 		for i, pk := range signingStrings {
+
 			if strings.HasPrefix(pk, nostr.PubHRP) {
+
 				pubKey = pk
 
 				// before the pubkey can be a nonce also, return it if it
 				// decodes as hex
 
 				if i > 0 {
+
 					if _, err = hex.DecodeString(signingStrings[i-1]); err == nil {
+
 						nonce = signingStrings[i-1]
+
+						s.Log("nonce found %s\n", nonce)
 					}
 				}
 			}
@@ -134,8 +139,7 @@ func (s *Signr) RecogniseSig(possibleSig string) (sig *schnorr.Signature,
 	case strings.HasPrefix(possibleSig, nostr.SigHRP):
 
 		// decode the signature
-		sig, err = nostr.DecodeSignature(possibleSig)
-		if err != nil {
+		if sig, err = nostr.DecodeSignature(possibleSig); err != nil {
 
 			s.Log("not possible sig: %s\n")
 		}
@@ -143,16 +147,14 @@ func (s *Signr) RecogniseSig(possibleSig string) (sig *schnorr.Signature,
 		// a hex signature can only be an exact number of characters long
 	case len(possibleSig) == 128:
 		var sigBytes []byte
-		sigBytes, err = hex.DecodeString(possibleSig)
-		if err != nil {
+		if sigBytes, err = hex.DecodeString(possibleSig); err != nil {
 
-			s.Fatal("error decoding hex signature: %s\n", err)
+			s.Log("not a possible hex signature: %s\n", err)
 		}
 
-		sig, err = schnorr.ParseSignature(sigBytes)
-		if err != nil {
+		if sig, err = schnorr.ParseSignature(sigBytes); err != nil {
 
-			s.Log("not possible sig: %s\n")
+			s.Log("not possible nsig: %s\n")
 		}
 	}
 	return

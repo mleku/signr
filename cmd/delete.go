@@ -21,7 +21,7 @@ to actually delete a key, you must manually delete it in the filesystem. the fil
 
 		err := s.Delete(args[0])
 		if err != nil {
-			s.PrintErr("error deleting key '%s': %s\n", err)
+			s.Err("error deleting key '%s': %s\n", err)
 		}
 	},
 }

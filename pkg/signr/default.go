@@ -6,6 +6,7 @@ import (
 )
 
 func (s *Signr) SetDefault(name string) (err error) {
+
 	grid, _, err := s.GetList(nil)
 	if err != nil {
 
@@ -13,6 +14,7 @@ func (s *Signr) SetDefault(name string) (err error) {
 	}
 
 	if s.DefaultKey == name {
+
 		return fmt.Errorf("key '%s' was already the default", s.DefaultKey)
 	}
 
@@ -31,7 +33,7 @@ func (s *Signr) SetDefault(name string) (err error) {
 					s.Fatal("failed to update config: '%v'\n", err)
 				}
 
-				s.PrintErr("key %s %s now default\n", row[0], row[1])
+				s.Err("key %s %s now default\n", row[0], row[1])
 				return
 			}
 		}

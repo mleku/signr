@@ -20,8 +20,8 @@ func (s *Signr) GetKey(name, passStr string) (key *secp256k1.SecretKey,
 	err error) {
 
 	var keyBytes []byte
-	keyBytes, err = s.ReadFile(name)
-	if err != nil {
+	if keyBytes, err = s.ReadFile(name); err != nil {
+
 		err = errors.Wrap(err, "error getting key bytes:")
 		return
 	}
@@ -48,9 +48,9 @@ func (s *Signr) GetKey(name, passStr string) (key *secp256k1.SecretKey,
 			break
 		}
 	}
-	_, err = hex.Decode(keyBytes, keyBytes)
-	if err != nil {
-		s.PrintErr("ERROR: decoding key hex: '%v", err)
+	if _, err = hex.Decode(keyBytes, keyBytes); err != nil {
+
+		s.Err("ERROR: decoding key hex: '%v", err)
 		return
 	}
 
@@ -58,17 +58,19 @@ func (s *Signr) GetKey(name, passStr string) (key *secp256k1.SecretKey,
 
 	secret := make([]byte, 32)
 
-	p := viper.GetString("pass")
-	if p != "" {
+	if p := viper.GetString("pass"); p != "" {
+
 		passStr = p
 	}
 
 	if passStr != "" {
-		copy(secret, originalSecret)
-		if key, err = s.DeriveAndCheckKey(name, secret,
-			[]byte(passStr)); err != nil {
 
-			s.PrintErr("password failed to unlock key: %s\n", err)
+		copy(secret, originalSecret)
+
+		if key, err = s.
+			DeriveAndCheckKey(name, secret, []byte(passStr)); err != nil {
+
+			s.Err("password failed to unlock key: %s\n", err)
 
 			return
 		}
@@ -85,21 +87,26 @@ func (s *Signr) GetKey(name, passStr string) (key *secp256k1.SecretKey,
 
 			copy(secret, originalSecret)
 			if tryCount > 0 {
+
 				retryStr = fmt.Sprintf(" (attempt %d of %d)", tryCount+1, 3)
 			}
+
 			unlockPrompt := fmt.Sprintf("%s%s:", UnlockPrompt, retryStr)
-			pass, err = s.PasswordEntry(unlockPrompt, 0)
-			if err != nil {
-				s.PrintErr(
-					"error in password input: '%s'\n", err)
+
+			if pass, err = s.PasswordEntry(unlockPrompt, 0); err != nil {
+
+				s.Err("error in password input: '%s'\n", err)
 				continue
 			}
 
-			if key, err = s.DeriveAndCheckKey(name, secret,
-				pass); err != nil {
+			if key, err = s.
+				DeriveAndCheckKey(name, secret, pass); err != nil {
+
 				tryCount++
 				continue
+
 			} else {
+
 				break
 			}
 
@@ -109,6 +116,7 @@ func (s *Signr) GetKey(name, passStr string) (key *secp256k1.SecretKey,
 
 		key = secp256k1.SecKeyFromBytes(originalSecret)
 	}
+
 	return
 }
 
@@ -128,7 +136,8 @@ func (s *Signr) DeriveAndCheckKey(name string,
 	// check the decrypted secret generates the stored pubkey
 	pubBytes, err = s.ReadFile(name + "." + PubExt)
 	if err != nil {
-		s.PrintErr("error reading pubkey: %s\n", err)
+
+		s.Err("error reading pubkey: %s\n", err)
 		return
 	}
 	npubReal := strings.TrimSpace(string(pubBytes))
@@ -137,6 +146,7 @@ func (s *Signr) DeriveAndCheckKey(name string,
 		npub == npubReal, npub, npubReal)
 
 	if npub != npubReal {
+
 		err = fmt.Errorf("ERROR: %s, password failed to unlock key, try again\n",
 			err)
 	}
@@ -146,31 +156,35 @@ func (s *Signr) DeriveAndCheckKey(name string,
 
 // XOR two same length slices of bytes.
 func (s *Signr) XOR(dest, src []byte) []byte {
+
 	if len(src) != len(dest) {
+
 		s.Err("key and secret must be the same length")
 	}
 	for i := range dest {
+
 		dest[i] = dest[i] ^ src[i]
 	}
+
 	return dest
 }
 
 // ArgonKey hash grinds the input password string to derive the actual
 // encryption key used on the secret key.
 func ArgonKey(pass []byte) []byte {
+
 	return argon2.Key(pass, []byte("signr"), 3, 1024*1024, 4, 32)
 }
 
 // GenKeyPair creates a fresh new key pair using the entropy source used by
 // crypto/rand (ie, /dev/random on posix systems).
 func (s *Signr) GenKeyPair() (sec *secp256k1.SecretKey,
-	pub *secp256k1.PublicKey,
-	err error) {
+	pub *secp256k1.PublicKey, err error) {
 
 	sec, err = secp256k1.GenerateSecretKey()
 	if err != nil {
 
-		s.PrintErr("error generating key: '%s'", err)
+		s.Err("error generating key: '%s'", err)
 		return
 	}
 

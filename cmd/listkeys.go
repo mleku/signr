@@ -13,8 +13,7 @@ var listkeysCmd = &cobra.Command{
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		grid, encrypted, err :=
-			s.GetList([][]string{{"name", "fingerprint"}})
+		grid, encrypted, err := s.GetList([][]string{{"name", "fingerprint"}})
 		if err != nil {
 
 			s.Fatal("error getting list: '%v'\n\n", err)
@@ -56,7 +55,7 @@ var listkeysCmd = &cobra.Command{
 		grid = append(grid, tail...)
 		maxLen1++
 
-		s.PrintErr("keys in keychain: (* = password protected)\n\n")
+		s.Err("keys in keychain: (* = password protected)\n\n")
 		cryptedStr := make(map[bool]string)
 		cryptedStr[true] = " "
 		cryptedStr[false] = "*"
@@ -65,7 +64,7 @@ var listkeysCmd = &cobra.Command{
 
 			_, clear := encrypted[row[0]]
 
-			s.PrintErr("  %s %s %s\n",
+			s.Err("  %s %s %s\n",
 				cryptedStr[!clear],
 				PadToLength(row[0], maxLen1),
 				row[1]+defaultStr[row[0] == s.DefaultKey],

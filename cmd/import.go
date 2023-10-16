@@ -8,7 +8,7 @@ import (
 var importCmd = &cobra.Command{
 	Use:   "import <secret key> <name>",
 	Short: "Import a secret key",
-	Long: `Import a secret key provided in hexadecimal and nostr nsec formats.
+	Long: `Import a secret key provided in hexadecimal or nostr nsec formats.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -17,7 +17,9 @@ var importCmd = &cobra.Command{
 
 			s.Fatal("a key name is required after the secret key")
 		}
+
 		if err := s.Import(args[0], args[1]); err != nil {
+
 			s.Fatal("ERROR: while importing: '%s'\n", err)
 		}
 	},

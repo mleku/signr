@@ -8,41 +8,37 @@ import (
 
 func (s *Signr) Gen(name string) {
 
-		sec, pub, err := s.GenKeyPair()
-		if err != nil {
+	sec, pub, err := s.GenKeyPair()
+	if err != nil {
 
-			s.Fatal("error generating key: '%s'", err)
-		}
+		s.Fatal("error generating key: '%s'", err)
+	}
 
-		secBytes := sec.Serialize()
+	secBytes := sec.Serialize()
 
-		npub, _ := nostr.PublicKeyToNpub(pub)
+	npub, _ := nostr.PublicKeyToNpub(pub)
 
-		if s.Verbose {
+	s.Log(
+		"generated key pair:\n"+
+			"\nhex:\n"+
+			"\tsecret: %s\n"+
+			"\tpublic: %s\n\n",
+		hex.EncodeToString(secBytes),
+		hex.EncodeToString(schnorr.SerializePubKey(pub)),
+	)
 
-			pubBytes := schnorr.SerializePubKey(pub)
+	if s.Verbose {
+		nsec, _ := nostr.SecretKeyToNsec(sec)
+		s.Log("nostr:\n"+
+			"\tsecret: %s\n"+
+			"\tpublic: %s\n\n",
+			nsec, npub)
+	}
 
-			s.PrintErr(
-				"generated key pair:\n"+
-					"\nhex:\n"+
-					"\tsecret: %s\n"+
-					"\tpublic: %s\n\n",
-				hex.EncodeToString(secBytes),
-				hex.EncodeToString(pubBytes),
-			)
+	if err = s.Save(name, secBytes, npub); err != nil {
 
-			nsec, _ := nostr.SecretKeyToNsec(sec)
-			s.PrintErr(
-				"nostr:\n"+
-					"\tsecret: %s\n"+
-					"\tpublic: %s\n\n", nsec,
-				npub)
-		}
-
-		if err = s.Save(name, secBytes, npub); err != nil {
-
-			s.Fatal("error saving keys: %v", err)
-		}
+		s.Fatal("error saving keys: %v", err)
+	}
 
 	return
 }

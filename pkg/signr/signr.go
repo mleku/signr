@@ -91,6 +91,9 @@ func (s *Signr) Sanitize(in string) (out string, err error) {
 	return
 }
 
+// FormatSig takes a slice of signing strings and stitches them together with
+// underscores, and snips off the hash and replaces it with the provided
+// signature.
 func FormatSig(signingStrings []string, sig *schnorr.Signature) (str string,
 	err error) {
 
@@ -107,36 +110,45 @@ func FormatSig(signingStrings []string, sig *schnorr.Signature) (str string,
 	return strings.Join(append(prefix, sigStr), "_"), err
 }
 
+// Log prints if verbose is enabled, and adds some color if it is enabled.
 func (s *Signr) Log(format string, a ...interface{}) {
 	if !s.Verbose {
 		return
 	}
 	if s.Color {
-		format = color.C256(214).Sprint("> ") + format
+		format = color.C256(214).Sprint("> "+ format)
 	}
 	_, _ = fmt.Fprintf(os.Stderr, format, a...)
 }
 
+// Err prints an error message, adds some color if enabled.
 func (s *Signr) Err(format string, a ...interface{}) {
-	if !s.Verbose {
-		return
-	}
 	if s.Color {
-		format = color.Red.Sprint("! ") + format
+		format = color.Red.Sprint("⚠️ " + format + " ⚠️")
 	}
 	_, _ = fmt.Fprintf(os.Stderr, format, a...)
 }
 
+// Info prints a message to stderr that won't be picked up by a standard simple
+// pipe/redirection.
+func (s *Signr) Info(format string, a ...interface{}) {
+	if s.Color {
+		format = color.Blue.Sprint(format)
+	}
+	_, _ = fmt.Fprintf(os.Stderr, format, a...)
+}
+
+func Newline() {
+	_, _ = fmt.Fprintf(os.Stderr, "\n")
+}
+
+// Fatal prints an error and then terminates the program.
 func (s *Signr) Fatal(format string, a ...interface{}) {
 	if s.Color {
 		format = color.Red.Sprint("FATAL: ") + format
 	}
 	_, _ = fmt.Fprintf(os.Stderr, format, a...)
 	os.Exit(1)
-}
-
-func (s *Signr) PrintErr(format string, a ...interface{}) {
-	_, _ = fmt.Fprintf(os.Stderr, format, a...)
 }
 
 func (s *Signr) GetNonceHex() (nonceHex string, err error) {

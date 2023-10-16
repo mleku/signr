@@ -22,16 +22,16 @@ func HashFile(filename string) (sum []byte, err error) {
 	default:
 
 		// read from the file
-		f, err = os.Open(filename)
-		if err != nil {
+		if f, err = os.Open(filename); err != nil {
+
 			err = fmt.Errorf("ERROR: unable to open file: %s\n\n", err)
 			return
 		}
 
 		defer func(f io.ReadCloser) {
 
-			err := f.Close()
-			if err != nil {
+			if err = f.Close(); err != nil {
+
 				err = fmt.Errorf("error while closing file: %s\n", err)
 				return
 			}
@@ -43,12 +43,13 @@ func HashFile(filename string) (sum []byte, err error) {
 
 	// run the file data through the hash function
 	if _, err = io.Copy(h, f); err != nil {
-		err = fmt.Errorf(
-			"ERROR: unable to read file to generate hash: %s\n\n",
+
+		err = fmt.Errorf("ERROR: unable to read file to generate hash: %s\n\n",
 			err)
 		return
 	}
 
 	sum = h.Sum(nil)
+
 	return
 }

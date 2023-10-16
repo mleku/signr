@@ -8,35 +8,54 @@ import (
 
 // Signr stores the configuration for signr.
 type Signr struct {
-	DataDir    string
-	CfgFile    string
-	DefaultKey string
-	Verbose    bool
-	Color      bool
+	DataDir       string
+	CfgFile       string
+	DefaultKey    string
+	Verbose       bool
+	Color         bool
+	PassEntryType int
 }
 
 // Init sets up the data directory if it doesn't exist, checks the permissions
 // of the directory and configuration file.
-func Init() (s *Signr) {
+func Init(passEntryType int) (s *Signr) {
 
-	s = &Signr{}
+	s = &Signr{PassEntryType: passEntryType}
 
 	s.DataDir = appdata.GetDataDir(AppName, false)
 
 	fi, exists, err := CheckFileExists(s.DataDir)
 
+	if err != nil {
+
+		err = fmt.Errorf("error checking if datadir exists: %s", err)
+
+		return
+	}
+
 	s.CfgFile = s.GetCfgFilename()
 
 	if !exists {
-		s.PrintErr("First run: Creating signr data directory at %s\n\n",
+
+		s.Err("First run: Creating signr data directory at %s\n\n",
 			s.DataDir)
 
 		if err = os.MkdirAll(s.DataDir, DataDirPerm); err != nil {
-			s.Fatal("unable to create data dir, cannot proceed\n")
+
+			err = fmt.Errorf("unable to create data dir, cannot proceed: %s\n",
+				err)
+
+			return
 		}
 
 		// Touch the config file so it is ready to write to.
-		os.WriteFile(s.CfgFile, []byte{}, ConfigFilePerm)
+		if err = os.WriteFile(s.CfgFile, []byte{}, ConfigFilePerm); err != nil {
+
+			err = fmt.Errorf("error writing config file '%s': %s", s.CfgFile,
+				err)
+
+			return
+		}
 
 		// check the permissions
 	} else if fi.Mode().Perm()&DataFileMask != 0 {
@@ -48,12 +67,15 @@ func Init() (s *Signr) {
 			s.DataDir, fi.Mode().Perm(),
 			DataDirPerm, DataDirPerm)
 
-		s.Fatal("ERROR: '%s'\n", err)
+		return
 	}
 
 	if fi, err = os.Stat(s.CfgFile); err != nil {
-		s.Fatal("Unexpected error probing config file %s: '%s'\n",
+
+		err = fmt.Errorf("Unexpected error probing config file %s: %s",
 			s.CfgFile, err)
+
+		return
 	}
 
 	// check configuration permissions
@@ -66,7 +88,7 @@ func Init() (s *Signr) {
 			s.CfgFile, fi.Mode().Perm(), fi.Mode().Perm(),
 			ConfigFilePerm, ConfigFilePerm)
 
-		s.Fatal("ERROR: %s\n", err)
+		return
 	}
 
 	return s

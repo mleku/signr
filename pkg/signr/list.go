@@ -21,29 +21,37 @@ func (s *Signr) GetKeyPairNames() (list []string, err error) {
 		func(path string, info fs.FileInfo, err error) (e error) {
 
 			if info.IsDir() {
+
 				return
 			}
 
 			filename := filepath.Base(path)
+
+			// omit the config
 			if strings.HasSuffix(filename, ConfigExt) {
 
 				return
 			}
 
+			// omit files marked as deleted
 			if strings.HasSuffix(filename, DeletedExt) {
 
 				return
 			}
 
+			// identify public keys and group them with their secret key
+			// counterpart
 			splitted := strings.Split(filename, ".")
 			if len(splitted) == 1 || splitted[1] == PubExt {
 
 				keyMap[splitted[0]]++
 			}
+
 			return
 		},
 	)
 	if err != nil {
+
 		err = errors.Wrap(err, "failed while walking data directory")
 		return
 	}
@@ -62,8 +70,7 @@ func (s *Signr) GetKeyPairNames() (list []string, err error) {
 }
 
 func (s *Signr) GetList(g [][]string) (grid [][]string,
-	encrypted map[string]struct{},
-	err error) {
+	encrypted map[string]struct{}, err error) {
 
 	grid = g
 
@@ -71,11 +78,12 @@ func (s *Signr) GetList(g [][]string) (grid [][]string,
 	keySlice, err = s.GetKeyPairNames()
 	if err != nil {
 
-		s.Fatal("error reading in keychain data '%s'\n", err)
+		err = errors.Wrap(err, "error reading in keychain data '%s'\n")
 	}
 
 	var data []byte
 	encrypted = make(map[string]struct{})
+
 	for i := range keySlice {
 
 		pubFilename := keySlice[i] + "." + PubExt
@@ -83,14 +91,14 @@ func (s *Signr) GetList(g [][]string) (grid [][]string,
 		data, err = s.ReadFile(pubFilename)
 		if err != nil {
 
-			s.PrintErr("error reading file %s: %v\n", pubFilename, err)
+			s.Err("error reading file %s: %v\n", pubFilename, err)
 			continue
 		}
 
 		var secData []byte
 		if secData, err = s.ReadFile(keySlice[i]); err != nil {
 
-			s. PrintErr("error reading file '%s': %v\n", keySlice[i], err)
+			s.Err("error reading file '%s': %v\n", keySlice[i], err)
 			continue
 		}
 
@@ -112,8 +120,9 @@ func (s *Signr) GetList(g [][]string) (grid [][]string,
 		key := strings.TrimSpace(string(data))
 		if pk, err = nostr.NpubToPublicKey(key); err != nil {
 
-			s.PrintErr("error decoding key '%s' %s: %v\n",
+			s.Err("error decoding key '%s' %s: %v\n",
 				keySlice[i], pk, err)
+
 			continue
 		}
 

@@ -29,11 +29,15 @@ func Execute() {
 
 func init() {
 
-	s = signr.Init()
+	// because this is a CLI app we know the user can enter passwords this way.
+	s = signr.Init(signr.PasswordEntryViaTTY)
+
 	rootCmd.PersistentFlags().BoolVarP(&s.Verbose,
 		"verbose", "v", false, "prints more things")
+
 	rootCmd.PersistentFlags().BoolVarP(&s.Color,
 		"color", "c", false, "prints more things")
+
 	cobra.OnInitialize(initConfig(s))
 }
 

@@ -24,8 +24,8 @@ func (s *Signr) Import(secKey, name string) (err error) {
 		var secBytes []byte
 		if secBytes, err = hex.DecodeString(secKey); err != nil {
 
-			err = fmt.Errorf(
-				"key is mangled, '%s', cannot decode: '%v'", secKey, err)
+			err = fmt.Errorf("key is mangled, '%s', cannot decode: '%v'",
+				secKey, err)
 			return
 		}
 
@@ -35,6 +35,7 @@ func (s *Signr) Import(secKey, name string) (err error) {
 	if sec == nil {
 
 		err = fmt.Errorf("input did not match any known formats")
+
 		return
 	}
 
@@ -43,20 +44,18 @@ func (s *Signr) Import(secKey, name string) (err error) {
 
 	npub, _ := nostr.PublicKeyToNpub(pub)
 
+	s.Log("hex:\n"+
+		"\tsecret: %s\n"+
+		"\tpublic: %s\n",
+		hex.EncodeToString(secBytes),
+		hex.EncodeToString(schnorr.SerializePubKey(pub)),
+	)
+
 	if s.Verbose {
-
-		pubBytes := schnorr.SerializePubKey(pub)
-
-		s.PrintErr("hex:\n"+
-			"\tsecret: %s\n"+
-			"\tpublic: %s\n",
-			hex.EncodeToString(secBytes),
-			hex.EncodeToString(pubBytes),
-		)
 
 		nsec, _ := nostr.SecretKeyToNsec(sec)
 
-		s.PrintErr("nostr:\n"+
+		s.Err("nostr:\n"+
 			"\tsecret: %s\n"+
 			"\tpublic: %s\n\n",
 			nsec, npub)
@@ -66,5 +65,6 @@ func (s *Signr) Import(secKey, name string) (err error) {
 
 		err = fmt.Errorf("error saving keys: %v", err)
 	}
+
 	return
 }
