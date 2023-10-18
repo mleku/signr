@@ -35,5 +35,6 @@ the name should be relevant to the purpose of the key, cannot contain any non-pr
 }
 
 func init() {
+
 	rootCmd.AddCommand(genCmd)
 }

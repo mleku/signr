@@ -8,7 +8,7 @@ import (
 var importCmd = &cobra.Command{
 	Use:   "import <secret key> <name>",
 	Short: "Import a secret key",
-	Long: `Import a secret key provided in hexadecimal or nostr nsec formats.
+	Long: `Import a secret key provided in hexadecimal or nostr nsec format.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
