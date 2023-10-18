@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/mleku/ec/schnorr"
 	secp256k1 "github.com/mleku/ec/secp"
 )
 
@@ -63,6 +64,46 @@ func TestSecretKeyToNsec(t *testing.T) {
 		}
 		if reNsec != nsec {
 			t.Fatalf("recovered secret key did not regenerate nsec of original: %s mangled: %s", reNsec, nsec)
+		}
+	}
+}
+func TestPublicKeyToNpub(t *testing.T) {
+	var err error
+	var sec *secp256k1.SecretKey
+	var pub, rePub *secp256k1.PublicKey
+	var npub, reNpub string
+	var pubBytes, rePubBytes []byte
+	for i := 0; i < 10000; i++ {
+		sec, err = secp256k1.GenerateSecretKey()
+		if err != nil {
+			t.Fatalf("error generating key: '%s'", err)
+			return
+		}
+		pub = sec.PubKey()
+		pubBytes = schnorr.SerializePubKey(pub)
+		npub, err = PublicKeyToNpub(pub)
+		if err != nil {
+			t.Fatalf("error converting key to npub: '%s'", err)
+			return
+		}
+		rePub, err = NpubToPublicKey(npub)
+		if err != nil {
+			t.Fatalf("error npub back to public key: '%s'", err)
+			return
+		}
+		rePubBytes = schnorr.SerializePubKey(rePub)
+		if string(pubBytes) != string(rePubBytes) {
+			t.Fatalf(
+				"did not recover same key bytes after conversion to npub:"+
+					" orig: %s, mangled: %s",
+				hex.EncodeToString(pubBytes), hex.EncodeToString(rePubBytes))
+		}
+		reNpub, err = PublicKeyToNpub(rePub)
+		if err != nil {
+			t.Fatalf("error recovered secret key from converted to nsec: %s", err)
+		}
+		if reNpub != npub {
+			t.Fatalf("recovered public key did not regenerate npub of original: %s mangled: %s", reNpub, npub)
 		}
 	}
 }

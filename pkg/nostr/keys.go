@@ -2,6 +2,7 @@ package nostr
 
 import (
 	"fmt"
+
 	"github.com/mleku/bech32"
 	"github.com/mleku/ec/schnorr"
 	secp "github.com/mleku/ec/secp"
@@ -56,6 +57,11 @@ func NsecToSecretKey(encoded string) (sk *secp.SecretKey, err error) {
 	var b5, b8 []byte
 	var hrp string
 	hrp, b5, err = bech32.Decode(encoded)
+	if err != nil {
+		
+		return
+	}
+
 	if hrp != SecHRP {
 
 		err = fmt.Errorf("wrong human readable part, got '%s' want '%s'",
@@ -83,7 +89,7 @@ func NpubToPublicKey(encoded string) (pk *secp.PublicKey, err error) {
 	hrp, b5, err = bech32.Decode(encoded)
 	if err != nil {
 
-		err = fmt.Errorf("ERROR: '%s'\n", err)
+		err = fmt.Errorf("ERROR: '%s'", err)
 		return
 	}
 
