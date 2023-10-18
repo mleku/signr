@@ -116,7 +116,7 @@ func EncodeSignature(sig *schnorr.Signature) (str string, err error) {
 	b5, err = ConvertForBech32(sig.Serialize())
 	if err != nil {
 
-		err = fmt.Errorf("ERROR: '%s'\n", err)
+		err = fmt.Errorf("ERROR: '%s'", err)
 		return
 	}
 
@@ -133,7 +133,7 @@ func DecodeSignature(encoded string) (sig *schnorr.Signature, err error) {
 	hrp, b5, err = bech32.DecodeNoLimit(encoded)
 	if err != nil {
 
-		fmt.Printf("ERROR: '%s'\n", err)
+		err = fmt.Errorf("ERROR: '%s'", err)
 		return
 	}
 
