@@ -109,11 +109,13 @@ Note the presence of the random nonce and the public key.
 
 For other uses, it may be desired to only sign a hash and only get the signature back.
 
-If the first parameter is 64 characters long, and purely containing `0-9a-f` it will be interpreted as a hash and signed without the addition of the random number and public key as with the `filename/-` and will return only the signature in bech32.
+If the first parameter is 64 characters long, and purely containing `0-9a-f` it will be interpreted as a hash and signed without the addition of the random number as with the `filename/-` and will return only the signature in bech32.
 
-    $ signr sign 5167fc037d96be70b809e3c669b7cb64864206273757f670af8f729beabf6ddc
-    
-    sig1qvltpcp06r902gwmylvysfdqh453c2fn9a9znr0y5jvcsm7j75snjcqxyhvr8n4hhwdcw6ex0w8g24nl8km5mrmjg0sw0r889unfvsslqe2rv
+    $ go run . sign --hex 5167fc037d96be70b809e3c669b7cb64864206273757f670af8f729beabf6ddc
+
+    type password to unlock encrypted secret key:
+
+    74ca3325925ef0de4006d80cf64aed379596a397850f4514f22baf0f30894149fa3d16d6fa7524271eeb88010d08febc699127a615c409881b7713ebd45c2605
 
 The signature will be printed in Bech32 by default, use the flag `--hex` to get a hexadecimal version:
 
@@ -131,35 +133,138 @@ rather than being signed directly on the provided value encoded as binary.
 To allow custom protocols to be devised, this can have an additional custom string using the `--custom` flag:
 
     $ go run . -v sign --custom arbitrary-protocol-string go.sum
+
     Using config file: /home/me/.signr/config.yaml
     signing on message: signr_0_SHA256_SCHNORR_arbitrary-protocol-string_8b716747195afc47_npub1vp0q3vl6sgvpwq5pcfdjyjj8q2kg3r6aa45vclzu8xuyrmaahl4svlvppa_a61e297a6a401ceef85dff780e757d55016e402230a8c5e308fcb13cf4434f3a
+    
     signr_0_SHA256_SCHNORR_arbitrary-protocol-string_8b716747195afc47_npub1vp0q3vl6sgvpwq5pcfdjyjj8q2kg3r6aa45vclzu8xuyrmaahl4svlvppa_sig1wk3ndpaldxct9v9dc3p0r0ynpwzcy9nyuadyzfp7xx7hcrxrm6c4ptanwlqywnf0vdlyc28krnfszyw0apev2t5vyrwetgp6deqvc7ggkf4xy
 
 The arbitrary custom string has any leading or following spaces or carriage returns removed:
 
     $ go run . -v sign --custom "arbitrary protocol string 
-    " go.sum
+        " go.sum
+
     Using config file: /home/me/.signr/config.yaml
-    signing on message: signr_0_SHA256_SCHNORR_arbitrary_protocol_string_1093f338208d86c6_npub1vp0q3vl6sgvpwq5pcfdjyjj8q2kg3r6aa45vclzu8xuyrmaahl4svlvppa_a61e297a6a401ceef85dff780e757d55016e402230a8c5e308fcb13cf4434f3a
-    signr_0_SHA256_SCHNORR_arbitrary_protocol_string_1093f338208d86c6_npub1vp0q3vl6sgvpwq5pcfdjyjj8q2kg3r6aa45vclzu8xuyrmaahl4svlvppa_sig1f8w9pgwuuj9xhg023g46xjtuz9h958rngy9mt2zqku9r0aj9cfg8rst4dxccqzdvvum9m3hu3ulhxfy6wsspgpvujgr4gt9dmatkyusn2ldld
+    signing on message: signr_0_SHA256_SCHNORR__41a7170e39e1a703_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+    type password to unlock encrypted secret key:
+    secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
+    
+    signr_0_SHA256_SCHNORR__41a7170e39e1a703_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_nsig13qu78yepuzl7z6zafj388h34funs7e2aku5naue8a0q7v07gp5y8wprstnk6ggcwgvf0utuvuuqe9dkk9ta6grdc9nh5frlxulkj3asjlr2th
 
 Carriage returns as well, though these can only end up in the text very deliberately with a copy/paste or other programmatic method:
 
     $ go run . -v sign --custom "arbitrary protocol string 
-    " go.sum
+        " go.sum
+
     Using config file: /home/me/.signr/config.yaml
-    signing on message: signr_0_SHA256_SCHNORR_arbitrary_protocol_string_93d2fdebb8c517da_npub1vp0q3vl6sgvpwq5pcfdjyjj8q2kg3r6aa45vclzu8xuyrmaahl4svlvppa_a61e297a6a401ceef85dff780e757d55016e402230a8c5e308fcb13cf4434f3a
-    signr_0_SHA256_SCHNORR_arbitrary_protocol_string_93d2fdebb8c517da_npub1vp0q3vl6sgvpwq5pcfdjyjj8q2kg3r6aa45vclzu8xuyrmaahl4svlvppa_sig189c3ty6nqjg2v8zalgej26vq2sms7n8hku5kvvc8v2whveas4n8vzpmfk5xx64ma7h80eq0czj2f69yrfavyet9vljwkns40r0eqpqgwg7urt
+    signing on message: signr_0_SHA256_SCHNORR__d73d19ff8de5dcec_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+    type password to unlock encrypted secret key:
+    secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
+
+    signr_0_SHA256_SCHNORR__d73d19ff8de5dcec_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_nsig1xucg87qfca6capz2j5mzw9lhkx3vm3j47htqqgp7z5nrvre950zzwr6n3udkwf0lz66lttxxh52n6hzptx6f8he40msngwk90ww9rhcgmfljx
 
 For completeness, the same thing except with a hash instead of a file:
 
     $ go run . -v sign --custom "arbitrary protocol string 
     " a61e297a6a401ceef85dff780e757d55016e402230a8c5e308fcb13cf4434f3a
+
     Using config file: /home/me/.signr/config.yaml
-    signing on message: signr_0_SHA256_SCHNORR_arbitrary_protocol_string_a61e297a6a401ceef85dff780e757d55016e402230a8c5e308fcb13cf4434f3a
-    sig1p4qq4z47zupuxenmn34lfa45erjfwjxnxcns7ll3yz534xlmu4l9gg7c0pfy0vfy3xdez42cuaj7h2q9805a82lxs2gk49reday90wgvelhcv
+    signing on message: signr_0_SHA256_SCHNORR__npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_a61e297a6a401ceef85dff780e757d55016e402230a8c5e308fcb13cf4434f3a
+    type password to unlock encrypted secret key:
+    secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
+    
+    nsig1hkdkdaulkyky43ec077phk0dlmpwnmw65yvh0vg6w5mcj2xqjnw55de9cftl45gjdts32e2j7yjp968v6l7wfutgefzx03yay79af5ssy52q0
 
 ### verify
+
+The `verify` command with a filename or piped file input, plus a signature, or signature filename enables the signing of a file.
+
+A simple all-in-one example that covers a lot of the features involved, including a signing using an encrypted key with an environment variable, looks like this:
+
+    $ go run . -v -c verify go.sum `SIGNR_PASS=aoeu go run . -v -c sign go.sum`
+    
+    > Using config file: /home/me/.signr/config.yaml
+    > signing on message: signr_0_SHA256_SCHNORR_503ca48a2056127e_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+    > secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
+    > Using config file: /home/me/.signr/config.yaml
+    > pubkey input: 
+    > pubkey from env: 
+    > nonce found 503ca48a2056127e
+    > pubkey in signature: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
+    > loading pubkey: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
+    > adding nonce 
+    > message: 
+    
+    signr_0_SHA256_SCHNORR_503ca48a2056127e_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+    VALID
+
+In this example several things are visible - as the logging has been enabled with `-v`:
+
+The actual string that is hashed to generate a signature is this:
+
+    signr_0_SHA256_SCHNORR_503ca48a2056127e_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+
+As you can see later on in the output, this text is repeated in the verification step as this full string is read in, in this case, with a standard `signr` signing material format. 
+
+This example does not show the output of the embedded signing command, which looks like this:
+
+    $ SIGNR_PASS=aoeu go run . -v -c sign go.sum
+
+    > Using config file: /home/me/.signr/config.yaml
+    > signing on message: signr_0_SHA256_SCHNORR_08f0f2582204bead_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+    > secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
+    
+    signr_0_SHA256_SCHNORR_08f0f2582204bead_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_nsig1qvyx4xhs8nek3uecpeleqvqn8nxrvq30zpfxj0ephf7pg6vxh0xrme7wrp9ufwdxv453q0lj22yw5608h5dwypux4esy4yndrqwv48qv6szf5
+
+The actual signature, that could be provided as a file alongside a download, for example, or in the advertisment of a file available on a torrent, let's say, is this:
+
+    signr_0_SHA256_SCHNORR_08f0f2582204bead_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_nsig1qvyx4xhs8nek3uecpeleqvqn8nxrvq30zpfxj0ephf7pg6vxh0xrme7wrp9ufwdxv453q0lj22yw5608h5dwypux4esy4yndrqwv48qv6szf5
+
+### advanced usage
+
+If the protocol separates things, then first of all, the nonce will not be used. The protocol would need to use the `--custom` feature to embed any extra strings, which are sanitised to be only printable characters with single spaces represented as hyphens.
+
+When a raw hexadecimal hash is provided in place of a file, `signr` automatically changes its mode and will output either an `nsig` formatted signature alone, or a hexadecimal signature, as requested. These two look like this:
+
+    $ SIGNR_PASS=aoeu go run . -v -c sign --sigonly go.sum
+
+    > Using config file: /home/me/.signr/config.yaml
+    > signing on message: signr_0_SHA256_SCHNORR_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+    > secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
+ 
+    nsig1sp0u578eds7mka2v4gxrrcyyzmpkm9vkrdp6ddyvr7sjrlxprjrrcd6m6y2cnq2c6pf2ze7utc4y877x94amludluxja52dvk9z88pg2hzgyr
+
+As you can see, the final output, which has been separated visually (in the commandline the lines starting with `>` are also in a different color) is just the signature. Changing it to `--hex` instead of `--sigonly` yields much the same output but with a different final result:
+
+    $ SIGNR_PASS=aoeu go run . -v -c sign --hex go.sum
+    
+    > Using config file: /home/me/.signr/config.yaml
+    > signing on message: signr_0_SHA256_SCHNORR_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+    > secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
+    
+    805fca78f96c3dbb754caa0c31e08416c36d95961b43a6b48c1fa121fcc11c863c375bd115898158d052a167dc5e2a43fbc62d7bbff1bfe1a5da29acb1447385
+
+Again the input and output lines have been visually spaced as they are colorised in the actual output using the `-c` (`--color`) flag, but both are the same value once parsed and decoded into binary.
+
+Lastly, to illustrate what happens when a hash is provided instead of a file, the result is the same as these `--sigonly` and `--hex` versions but you don't specify a file, instead you just give it the hash in hexadecimal:
+
+    $ SIGNR_PASS=aoeu go run . -v -c sign --hex 830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+
+    > Using config file: /home/me/.signr/config.yaml
+    > signing on message: signr_0_SHA256_SCHNORR_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+    > secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
+    
+    805fca78f96c3dbb754caa0c31e08416c36d95961b43a6b48c1fa121fcc11c863c375bd115898158d052a167dc5e2a43fbc62d7bbff1bfe1a5da29acb1447385
+    
+In the above the `--hex` flag is used, and we get the same raw hex as you saw above from the file (the example uses the current state of the `go.sum` file from the repository). If you explicitly use `--sigonly` or no flag at all, if the input is a hex (and again, for brevity, we are signing with the default signature, providing its password via environment variable), you get the `nsig` instead:
+
+    $ SIGNR_PASS=aoeu go run . -v -c sign 830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+
+    > Using config file: /home/me/.signr/config.yaml
+    > signing on message: signr_0_SHA256_SCHNORR_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+    > secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
+    
+    nsig1sp0u578eds7mka2v4gxrrcyyzmpkm9vkrdp6ddyvr7sjrlxprjrrcd6m6y2cnq2c6pf2ze7utc4y877x94amludluxja52dvk9z88pg2hzgyr
 
 
 
@@ -168,15 +273,16 @@ For completeness, the same thing except with a hash instead of a file:
 It provides the following functionality:
 
 - [x] Key generation - using the system's strong entropy source
-    - [x] hexadecimal
-    - [x] nostr nsec format
+    - [x] hexadecimal secret key
+    - [x] nostr nsec format public key
 - [x] Secret key import
-    - [x] hexadecimal
-    - [x] nostr nsec key format
+    - [x] hexadecimal secret key
+    - [x] nostr nsec secret key format
 - [x] Signing of data
     - [x] from file
     - [x] piped via stdin
     - [x] on raw hash (v1.1.1)
+    - [ ] bitcoin ecdsa signatures on raw transaction data (PSBT) (v1.2.x)
 - [x] Verification - checking a signature matches
     - [x] from file
     - [x] piped via stdin
@@ -185,6 +291,7 @@ It provides the following functionality:
     - [x] validating filesystem security of keychain files and folder
     - [x] setting a default key to use when unspecified for signing
     - [x] Encryption of private keys.
+    - [ ] display of corresponding bitcoin address (v1.2.x)
 
 In order to prevent cross-protocol attacks, the signature is applied not
 directly on the hash of the message, but rather a distinctive structure that
