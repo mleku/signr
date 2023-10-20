@@ -29,43 +29,30 @@ if the consuming protocol requires an additional custom namespace, and was used 
 		if len(args) < 2 {
 			s.Fatal("ERROR: at minimum a file and a keyfile name must be specified\n\n")
 		}
-
 		filename := args[0]
 		sigOrSigFile := args[1]
-
 		s.Log("pubkey input: %s\n", PubKey)
-
 		// if we didn't get a pubkey string, scan env for it.
 		if PubKey == "" {
-
 			PubKey = viper.GetString("pubkey")
-
 			if PubKey == "" {
-
 				s.Log("pubkey from env: %s\n", PubKey)
 			}
 		}
-
 		var valid bool
 		var err error
 		valid, err = s.Verify(filename, sigOrSigFile, PubKey, Custom)
-
 		if err != nil {
-
 			s.Fatal("error verifying signature: %s\n", err)
 		}
-
 		fmt.Println(validity[valid])
 	},
 }
 
 func init() {
-
 	verifyCmd.PersistentFlags().StringVarP(&PubKey, "pubkey", "p", "",
 		"public key to check with if custom protocol omits it from the output")
-
 	verifyCmd.PersistentFlags().StringVarP(&Custom, "custom", "k", "",
 		"custom additional namespace")
-
 	rootCmd.AddCommand(verifyCmd)
 }

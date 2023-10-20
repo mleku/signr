@@ -14,15 +14,11 @@ func (s *Signr) PasswordEntry(prompt string, entryType int) (pass []byte,
 
 	switch entryType {
 	case PasswordEntryViaTTY:
-
 		s.Info(prompt)
 		pass, err = terminal.ReadPassword(1)
 		Newline()
-
 	default:
-
 		s.Err("password entry type %d not implemented\n", entryType)
 	}
-
 	return
 }

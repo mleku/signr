@@ -14,12 +14,9 @@ var importCmd = &cobra.Command{
 
 		argLen := len(args)
 		if argLen == 1 {
-
 			s.Fatal("a key name is required after the secret key")
 		}
-
 		if err := s.Import(args[0], args[1]); err != nil {
-
 			s.Fatal("ERROR: while importing: '%s'\n", err)
 		}
 	},

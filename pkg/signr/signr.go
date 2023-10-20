@@ -4,60 +4,92 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"github.com/gookit/color"
-	"github.com/mleku/ec/schnorr"
-	"github.com/mleku/signr/pkg/nostr"
 	"os"
 	"path/filepath"
 	"strings"
 	"unicode"
+
+	"github.com/gookit/color"
+	"github.com/mleku/ec/schnorr"
+	"github.com/mleku/signr/pkg/nostr"
+)
+
+type SigID int
+
+const (
+	// Signature type identifiers
+	SchnorrType SigID = iota
+	BTCType
 )
 
 const (
-	AppName                    = "signr"
-	ConfigExt                  = "yaml"
-	DeletedExt                 = "del"
-	ConfigName                 = "config"
-	PubExt                     = "pub"
+	// strings used in signature prefix and other places
+	AppName                  = "signr"
+	ProtocolVersion          = "0"
+	DefaultHashFunction      = "SHA256"
+	SchnorrSignatures        = "SCHNORR"
+	BitcoinCompactSignatures = "ECDSA"
+)
+
+const (
+	// filename extensions found in app data directory
+	ConfigExt  = "yaml"
+	DeletedExt = "del"
+	ConfigName = "config"
+	PubExt     = "pub"
+)
+
+const (
+	// expected filesystem permissions/masks
 	DataDirPerm    os.FileMode = 0700
 	ConfigFilePerm os.FileMode = 0600
 	KeyFilePerm    os.FileMode = 0400
 	DataFileMask   os.FileMode = 0077
 )
 
+// SigTypes are the available signature algorithms
+var SigTypes = []string{SchnorrSignatures, BitcoinCompactSignatures}
+
 func (s *Signr) GetCfgFilename() string {
 	return filepath.Join(s.DataDir, ConfigName+"."+ConfigExt)
 }
 
-func GetDefaultSigningStrings() (signingStrings []string) {
+// GetDefaultSigningStrings returns a slice of strings that forms the prefix of
+// a signature/signing material block.
+//
+// sigType is used to optionally switch to ECDSA bitcoin transaction signatures
+// to enable the use case of signing PBSTs for on-chain transactions such as
+// anchoring hashes for a chain-bound protocol.
+func GetDefaultSigningStrings(sigType ...SigID) (signingStrings []string) {
 
-	// for now the first 4 are always the same
+	var sig SigID
+	if len(sigType) > 0 {
+		sig = sigType[0]
+	}
 	signingStrings = []string{
-		"signr", "0", "SHA256", "SCHNORR",
+		AppName, ProtocolVersion, DefaultHashFunction, SigTypes[sig],
 	}
 	return
 }
 
+// AddCustom string to the signature string for namespacing purposes.
 func (s *Signr) AddCustom(ss []string,
 	Custom string) (signingStrings []string) {
+
 	signingStrings = ss
 	// Add the custom protocol string to the base if provided:
 	if Custom != "" {
-
 		var err error
 		Custom, err = s.Sanitize(Custom)
-
 		if err != nil {
 			s.Log("error sanitizing custom string: %s\n", err)
 			return ss
 		}
-
 		// no matter the variation of non-printable characters in the string so
 		// long as the printable characters and the positions of their
 		// interstitial spaces will be canonical.
 		signingStrings = append(signingStrings, Custom)
 	}
-
 	return
 }
 
@@ -73,21 +105,16 @@ func (s *Signr) Sanitize(in string) (out string, err error) {
 		}
 		return ' '
 	}, in)
-
 	// all multiple non-printables then should be collapsed to single.
 	in = strings.Replace(in, "  ", " ", -1)
-
 	// leading and following space characters are removed
 	in = strings.TrimSpace(in)
-
 	// spaces are not permitted in custom string, but they could be
 	// added, so they will be replaced with hyphens, as are underscores.
 	in = strings.ReplaceAll(in, " ", "-")
-
 	if len(in) < 1 {
 		err = fmt.Errorf("empty string after sanitizing")
 	}
-
 	return
 }
 
@@ -98,31 +125,30 @@ func FormatSig(signingStrings []string, sig *schnorr.Signature) (str string,
 	err error) {
 
 	prefix := signingStrings[:len(signingStrings)-1]
-
 	var sigStr string
 	sigStr, err = nostr.EncodeSignature(sig)
 	if err != nil {
-
-		err = fmt.Errorf("ERROR: while formatting signature: '%s'\n", err)
+		err = fmt.Errorf("error while formatting signature: %s", err)
 		return
 	}
-
 	return strings.Join(append(prefix, sigStr), "_"), err
 }
 
 // Log prints if verbose is enabled, and adds some color if it is enabled.
 func (s *Signr) Log(format string, a ...interface{}) {
+
 	if !s.Verbose {
 		return
 	}
 	if s.Color {
-		format = color.C256(214).Sprint("> "+ format)
+		format = color.C256(214).Sprint("> " + format)
 	}
 	_, _ = fmt.Fprintf(os.Stderr, format, a...)
 }
 
 // Err prints an error message, adds some color if enabled.
 func (s *Signr) Err(format string, a ...interface{}) {
+
 	if s.Color {
 		format = color.Red.Sprint("⚠️ " + format + " ⚠️")
 	}
@@ -132,6 +158,7 @@ func (s *Signr) Err(format string, a ...interface{}) {
 // Info prints a message to stderr that won't be picked up by a standard simple
 // pipe/redirection.
 func (s *Signr) Info(format string, a ...interface{}) {
+
 	if s.Color {
 		format = color.Blue.Sprint(format)
 	}
@@ -144,6 +171,7 @@ func Newline() {
 
 // Fatal prints an error and then terminates the program.
 func (s *Signr) Fatal(format string, a ...interface{}) {
+
 	if s.Color {
 		format = color.Red.Sprint("FATAL: ") + format
 	}
@@ -151,18 +179,17 @@ func (s *Signr) Fatal(format string, a ...interface{}) {
 	os.Exit(1)
 }
 
+// GetNonceHex returns a random 16 charater hexadecimal string derived from a
+// 64 bit random value acquired through the system's strong entropy source.
 func (s *Signr) GetNonceHex() (nonceHex string, err error) {
 
 	// add the signature nonce
 	nonce := make([]byte, 8)
-
 	_, err = rand.Read(nonce)
 	if err != nil {
-
-		err = fmt.Errorf("error getting entropy: %s\n", err)
+		err = fmt.Errorf("error getting entropy: %s", err)
 		return
 	}
-
 	nonceHex = hex.EncodeToString(nonce)
 	return
 }

@@ -29,15 +29,17 @@ func Execute() {
 
 func init() {
 
+	var err error
 	// because this is a CLI app we know the user can enter passwords this way.
-	s = signr.Init(signr.PasswordEntryViaTTY)
-
+	// other types of apps using this can load the environment variables.
+	s, err = signr.Init(signr.PasswordEntryViaTTY)
+	if err != nil {
+		s.Fatal("fatal error: %s\n", err)
+	}
 	rootCmd.PersistentFlags().BoolVarP(&s.Verbose,
 		"verbose", "v", false, "prints more things")
-
 	rootCmd.PersistentFlags().BoolVarP(&s.Color,
 		"color", "c", false, "prints more things")
-
 	cobra.OnInitialize(initConfig(s))
 }
 
@@ -47,17 +49,13 @@ func initConfig(cfg *signr.Signr) func() {
 		viper.SetConfigName(signr.ConfigName)
 		viper.SetConfigType(signr.ConfigExt)
 		viper.AddConfigPath(cfg.DataDir)
-
 		// read in environment variables that match
 		viper.SetEnvPrefix(signr.AppName)
 		viper.AutomaticEnv()
-
 		// If a config file is found, read it in.
 		if err := viper.ReadInConfig(); err == nil && cfg.Verbose {
-
 			cfg.Log("Using config file: %s\n", viper.ConfigFileUsed())
 		}
-
 		cfg.DefaultKey = viper.GetString("default")
 	}
 }

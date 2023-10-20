@@ -15,10 +15,8 @@ to actually delete a key, you must manually delete it in the filesystem. the fil
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args)<1 {
-
 			s.Fatal("key name is required\n")
 		}
-
 		err := s.Delete(args[0])
 		if err != nil {
 			s.Err("error deleting key '%s': %s\n", err)

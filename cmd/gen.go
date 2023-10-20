@@ -16,25 +16,19 @@ the name should be relevant to the purpose of the key, cannot contain any non-pr
 		if len(args) < 1 {
 			s.Fatal("key name is required")
 		}
-
 		keyName := args[0]
-
 		var err error
 		keyName, err = s.Sanitize(keyName)
 		if err != nil {
 			s.Fatal("key name failed sanitizing: %s\n", keyName)
 		}
-
 		if keyName == args[0] {
-
 			s.Fatal("key name input is invalid - sanitizing it changed it\n")
 		}
-
 		s.Gen(keyName)
 	},
 }
 
 func init() {
-
 	rootCmd.AddCommand(genCmd)
 }

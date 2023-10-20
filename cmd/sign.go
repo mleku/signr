@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -24,37 +26,31 @@ The sigonly option is the same as the hex option except the output signature is 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		// if pass is given on CLI it overrides environment, but if it is empty and environment has a value, load it
+		if Pass == "" {
+			if p := viper.GetString("pass"); p != "" {
+				Pass = p
+			}
+		}
 		if signature, err := s.
 			Sign(args, Pass, Custom, Hex, OnlySig); err != nil {
-
 			s.Err("ERROR: while signing: %s\n", err)
-
 		} else {
-
 			fmt.Println(signature)
-
 		}
-
-		return
-
 	},
 }
 
 func init() {
-
 	signCmd.PersistentFlags().StringVarP(&Pass, "pass", "p", "",
 		"password to unlock the key - for better security, use the "+
 			"environment variable")
-
 	signCmd.PersistentFlags().StringVarP(&Custom, "custom", "k", "",
 		"custom additional namespace")
-
 	signCmd.PersistentFlags().BoolVarP(&Hex, "hex", "x", false,
 		"print signature in hex - this also applies the same effect as sigonly")
-
 	signCmd.PersistentFlags().BoolVarP(&OnlySig, "sigonly", "s", false,
 		"print only signature - note: this also omits the adding of a "+
 			"nonce as a verifier could not know it")
-
 	rootCmd.AddCommand(signCmd)
 }
