@@ -176,7 +176,7 @@ It provides the following functionality:
 - [x] Signing of data
     - [x] from file
     - [x] piped via stdin
-    - [ ] on raw hash (v1.1.0)
+    - [x] on raw hash (v1.1.1)
 - [x] Verification - checking a signature matches
     - [x] from file
     - [x] piped via stdin
