@@ -56,6 +56,13 @@ func initConfig(cfg *signr.Signr) func() {
 		if err := viper.ReadInConfig(); err == nil && cfg.Verbose {
 			cfg.Log("Using config file: %s\n", viper.ConfigFileUsed())
 		}
+
+		// if pass is given on CLI it overrides environment, but if it is empty and environment has a value, load it
+		if Pass == "" {
+			if p := viper.GetString("pass"); p != "" {
+				Pass = p
+			}
+		}
 		cfg.DefaultKey = viper.GetString("default")
 	}
 }

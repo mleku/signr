@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -25,13 +24,6 @@ If filename is in fact a 64 character hexadecimal value, it will be signed on wi
 The sigonly option is the same as the hex option except the output signature is in nostr nsig Bech32 format.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		// if pass is given on CLI it overrides environment, but if it is empty and environment has a value, load it
-		if Pass == "" {
-			if p := viper.GetString("pass"); p != "" {
-				Pass = p
-			}
-		}
 		if signature, err := s.
 			Sign(args, Pass, Custom, Hex, OnlySig); err != nil {
 			s.Err("ERROR: while signing: %s\n", err)
