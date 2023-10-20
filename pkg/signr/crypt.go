@@ -125,7 +125,7 @@ func (s *Signr) XOR(dest, src []byte) []byte {
 // ArgonKey hash grinds the input password string to derive the actual
 // encryption key used on the secret key.
 func ArgonKey(pass []byte) []byte {
-	return argon2.Key(pass, []byte("signr"), 3, 1024*1024, 4, 32)
+	return argon2.Key(pass, []byte(AppName), 3, 1024*1024, 4, 32)
 }
 
 // GenKeyPair creates a fresh new key pair using the entropy source used by

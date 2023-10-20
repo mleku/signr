@@ -16,7 +16,6 @@ func Equal(first, second []byte) (same bool) {
 		return
 	}
 	for i := range first {
-
 		if first[i] != second[i] {
 			return
 		}

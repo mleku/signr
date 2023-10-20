@@ -8,7 +8,7 @@ import (
 	"github.com/mleku/signr/pkg/nostr"
 )
 
-func (s *Signr) Gen(name string) (err error) {
+func (s *Signr) Generate(name string) (err error) {
 
 	sec, pub, err := s.GenKeyPair()
 	if err != nil {

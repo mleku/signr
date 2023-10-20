@@ -21,7 +21,7 @@ func (s *Signr) Delete(name string) (err error) {
 			nonce, err = s.GetNonceHex()
 			if err != nil {
 				return
-			}		
+			}
 			// construct deleted names for keys
 			sk := name + "." + nonce + "." + DeletedExt
 			pk := name + "." + nonce + "." + PubExt + "." + DeletedExt
@@ -44,6 +44,6 @@ func (s *Signr) Delete(name string) (err error) {
 
 	// key name was not found
 	err = fmt.Errorf("key named '%s' not found in keychain; "+
-		"use signr listkeys to see list of keys in keychain", name)
+		"use `%s listkeys` to see list of keys in keychain", AppName, name)
 	return
 }

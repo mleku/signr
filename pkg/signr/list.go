@@ -17,56 +17,39 @@ import (
 func (s *Signr) GetKeyPairNames() (list []string, err error) {
 
 	keyMap := make(map[string]int)
-
 	err = filepath.Walk(s.DataDir,
 		func(path string, info fs.FileInfo, err error) (e error) {
-
 			if info.IsDir() {
-
 				return
 			}
-
 			filename := filepath.Base(path)
-
 			// omit the config
 			if strings.HasSuffix(filename, ConfigExt) {
-
 				return
 			}
-
 			// omit files marked as deleted
 			if strings.HasSuffix(filename, DeletedExt) {
-
 				return
 			}
-
 			// identify public keys and group them with their secret key
 			// counterpart
 			splitted := strings.Split(filename, ".")
 			if len(splitted) == 1 || splitted[1] == PubExt {
-
 				keyMap[splitted[0]]++
 			}
-
 			return
 		},
 	)
 	if err != nil {
-
 		err = errors.Wrap(err, "failed while walking data directory")
 		return
 	}
-
 	for i := range keyMap {
-
 		if keyMap[i] == 2 {
-
 			list = append(list, i)
 		}
 	}
-
 	sort.Strings(list)
-
 	return
 }
 
@@ -77,7 +60,6 @@ func (s *Signr) GetList(g [][]string) (grid [][]string,
 	var keySlice []string
 	keySlice, err = s.GetKeyPairNames()
 	if err != nil {
-
 		err = errors.Wrap(err, "error reading in keychain data '%s'\n")
 	}
 	// determine whether keys are encrypted for the listing
