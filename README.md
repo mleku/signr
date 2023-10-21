@@ -281,17 +281,17 @@ It provides the following functionality:
 - [x] Signing of data
     - [x] from file
     - [x] piped via stdin
-    - [x] on raw hash (v1.1.1)
-    - [ ] bitcoin ecdsa signatures on raw transaction data (PSBT) (v1.2.x)
+    - [x] on raw hash
+    - [x] arbitrary custom namespace field
 - [x] Verification - checking a signature matches
     - [x] from file
     - [x] piped via stdin
+    - [x] external additional pubkey and custom field for signature only
 - [x] Keychain management
     - [x] storing keys in user profile
     - [x] validating filesystem security of keychain files and folder
     - [x] setting a default key to use when unspecified for signing
-    - [x] Encryption of private keys.
-    - [ ] display of corresponding bitcoin address (v1.2.x)
+    - [x] encryption of private keys.
 
 In order to prevent cross-protocol attacks, the signature is applied not
 directly on the hash of the message, but rather a distinctive structure that
