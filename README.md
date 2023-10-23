@@ -8,7 +8,7 @@ layout as `.ssh`, as well as sign and verify.
 
 if your go installation is all set up, and you have done all the things, you should be able to install `signr` as so:
 
-    # go install github.com/mleku/signr
+    go install github.com/mleku/signr
 
 ### setting up your Go dev environment
 
@@ -22,18 +22,25 @@ find them here: https://go.dev/dl/
 
 no idea why they are calling 1.21 branch stable, since it's an odd numbered minor. they are WRONG, so get 1.20:
 
-    # cd ~/ # AKA: $HOME
-    # wget https://go.dev/dl/go1.20.10.linux-amd64.tar.gz
+    cd $HOME 
+
+note that `cd` alone or `cd ~` both have the same result in most linux and posix compliant systems (YMMV with windows 'posix' compliance.)
+
+then
+
+    wget https://go.dev/dl/go1.20.10.linux-amd64.tar.gz
 
 i run from the source from the source repository of the original go source code (not github) but i'm not going to explain how to do that.
 
 mac users, just remember: apple loves you, and since i don't like apple, you are on your own. something something brew something tada. don't forget to install the xcode first of course.
 
+windows, just install WSL and bash terminal, then read WSL where i say 'ubuntu'.
+
 #### install Go
 
 then, unpack the binary distribution as so:
 
-    # tar xvf path/to/download/go1.20.10.linux-amd64.tar.gz
+    tar xvf path/to/download/go1.20.10.linux-amd64.tar.gz
 
 #### configure your shell environment
 
@@ -46,7 +53,10 @@ put the following lines at the end of your `~/.bashrc` or `~/.zshrc` or whatever
 
 close your current shell session (ctrl-D) and log in again/open up a new session and you should be able to do this:
 
-    # go version
+    go version
+
+which will print something like:
+
     go version go1.20.10 linux/amd64
 
 #### get the source code
@@ -63,18 +73,18 @@ assuming you have installed essentials git on your system... for that:
 
 then clone the source code:
 
-    # git clone https://github.com/mleku/signr.git
+    git clone https://github.com/mleku/signr.git
 
 or if you have a github account, you can use the SSH link instead:
 
-    # git clone git@github.com:mleku/signr.git
+    git clone git@github.com:mleku/signr.git
 
 #### compile and install
 
 then you can run the following to place the `signr` binary in your $PATH:
 
-    # cd signr
-    # go install .
+    cd signr
+    go install .
 
 to build the RPC API, go visit [pkg/protobufs/README.md](pkg/protobufs/README.md)
 
@@ -84,13 +94,11 @@ to build the RPC API, go visit [pkg/protobufs/README.md](pkg/protobufs/README.md
 
 The first thing to know is how to access the inbuilt help. The `signr` command by default prints the top level help information with no arguments:
 
-```bash
-# signr
-```
+    signr
 
 will print something like this:
 
-    A command line interface for generating, importing, signing, verifying and managing keys used with the Nostr protocol.
+    signr - A command line interface for generating, importing, signing, verifying and managing keys used with the Nostr protocol.
     
     Designed to function in a similar way to ssh-keygen in that it keeps the keychain in a user directory with named key pairs and a configuration file.
     
@@ -175,7 +183,9 @@ If the first parameter is `-` signr assumes the file to be hashed will appear on
 
 Either of these options will produce a canonical binary blob/file signature thus:
 
-    $ go run . sign go.sum
+    go run . sign go.sum
+
+which will return something like:
     
     signr_0_SHA256_SCHNORR_088b9a5b4bf3fd87_npub1vp0q3vl6sgvpwq5pcfdjyjj8q2kg3r6aa45vclzu8xuyrmaahl4svlvppa_sig135x8pmhfe2ancwjxeeu3rfdumtr95ceaqcw2vx2nv2ek655hyq5unc4g968r8jt4ucflqsz7m2l9jh2dy36va5kr4nzrgpgvrt2gzjcph9zgu
 
@@ -185,7 +195,9 @@ For other uses, it may be desired to only sign a hash and only get the signature
 
 If the first parameter is 64 characters long, and purely containing `0-9a-f` it will be interpreted as a hash and signed without the addition of the random number as with the `filename/-` and will return only the signature in bech32.
 
-    $ go run . sign --hex 5167fc037d96be70b809e3c669b7cb64864206273757f670af8f729beabf6ddc
+    go run . sign --hex 5167fc037d96be70b809e3c669b7cb64864206273757f670af8f729beabf6ddc
+
+which will return something like:
 
     type password to unlock encrypted secret key:
 
@@ -193,7 +205,9 @@ If the first parameter is 64 characters long, and purely containing `0-9a-f` it 
 
 The signature will be printed in Bech32 by default, use the flag `--hex` to get a hexadecimal version:
 
-    $ signr sign --hex 5167fc037d96be70b809e3c669b7cb64864206273757f670af8f729beabf6ddc
+    signr sign --hex 5167fc037d96be70b809e3c669b7cb64864206273757f670af8f729beabf6ddc
+
+which will return something like:
     
     033eb0e02fd0caf521db27d84825a0bd691c29332f4a298de4a499886fd2f52139600625d833ceb7bb9b876b267b8e85567f3db74d8f7243e0e78ce72f269642
 
@@ -206,8 +220,10 @@ rather than being signed directly on the provided value encoded as binary.
 
 To allow custom protocols to be devised, this can have an additional custom string using the `--custom` flag:
 
-    $ go run . -v sign --custom arbitrary-protocol-string go.sum
+    go run . -v sign --custom arbitrary-protocol-string go.sum
 
+which will return something like:
+    
     Using config file: /home/me/.signr/config.yaml
     signing on message: signr_0_SHA256_SCHNORR_arbitrary-protocol-string_8b716747195afc47_npub1vp0q3vl6sgvpwq5pcfdjyjj8q2kg3r6aa45vclzu8xuyrmaahl4svlvppa_a61e297a6a401ceef85dff780e757d55016e402230a8c5e308fcb13cf4434f3a
     
@@ -215,9 +231,11 @@ To allow custom protocols to be devised, this can have an additional custom stri
 
 The arbitrary custom string has any leading or following spaces or carriage returns removed:
 
-    $ go run . -v sign --custom "arbitrary protocol string 
+    go run . -v sign --custom "arbitrary protocol string 
         " go.sum
 
+which will return something like:
+    
     Using config file: /home/me/.signr/config.yaml
     signing on message: signr_0_SHA256_SCHNORR__41a7170e39e1a703_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
     type password to unlock encrypted secret key:
@@ -227,9 +245,11 @@ The arbitrary custom string has any leading or following spaces or carriage retu
 
 Carriage returns as well, though these can only end up in the text very deliberately with a copy/paste or other programmatic method:
 
-    $ go run . -v sign --custom "arbitrary protocol string 
+    go run . -v sign --custom "arbitrary protocol string 
         " go.sum
 
+which will return something like:
+    
     Using config file: /home/me/.signr/config.yaml
     signing on message: signr_0_SHA256_SCHNORR__d73d19ff8de5dcec_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
     type password to unlock encrypted secret key:
@@ -239,9 +259,11 @@ Carriage returns as well, though these can only end up in the text very delibera
 
 For completeness, the same thing except with a hash instead of a file:
 
-    $ go run . -v sign --custom "arbitrary protocol string 
+    go run . -v sign --custom "arbitrary protocol string 
     " a61e297a6a401ceef85dff780e757d55016e402230a8c5e308fcb13cf4434f3a
 
+which will return something like:
+    
     Using config file: /home/me/.signr/config.yaml
     signing on message: signr_0_SHA256_SCHNORR__npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_a61e297a6a401ceef85dff780e757d55016e402230a8c5e308fcb13cf4434f3a
     type password to unlock encrypted secret key:
@@ -255,7 +277,9 @@ The `verify` command with a filename or piped file input, plus a signature, or s
 
 A simple all-in-one example that covers a lot of the features involved, including a signing using an encrypted key with an environment variable, looks like this:
 
-    $ go run . -v -c verify go.sum `SIGNR_PASS=aoeu go run . -v -c sign go.sum`
+    go run . -v -c verify go.sum `SIGNR_PASS=aoeu go run . -v -c sign go.sum`
+
+which will return something like:
     
     > Using config file: /home/me/.signr/config.yaml
     > signing on message: signr_0_SHA256_SCHNORR_503ca48a2056127e_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
@@ -282,8 +306,10 @@ As you can see later on in the output, this text is repeated in the verification
 
 This example does not show the output of the embedded signing command, which looks like this:
 
-    $ SIGNR_PASS=aoeu go run . -v -c sign go.sum
+    SIGNR_PASS=aoeu go run . -v -c sign go.sum
 
+which will return something like:
+    
     > Using config file: /home/me/.signr/config.yaml
     > signing on message: signr_0_SHA256_SCHNORR_08f0f2582204bead_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
     > secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
@@ -300,8 +326,10 @@ If the protocol separates things, then first of all, the nonce will not be used.
 
 When a raw hexadecimal hash is provided in place of a file, `signr` automatically changes its mode and will output either an `nsig` formatted signature alone, or a hexadecimal signature, as requested. These two look like this:
 
-    $ SIGNR_PASS=aoeu go run . -v -c sign --sigonly go.sum
+    SIGNR_PASS=aoeu go run . -v -c sign --sigonly go.sum
 
+which will return something like:
+    
     > Using config file: /home/me/.signr/config.yaml
     > signing on message: signr_0_SHA256_SCHNORR_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
     > secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
@@ -310,7 +338,9 @@ When a raw hexadecimal hash is provided in place of a file, `signr` automaticall
 
 As you can see, the final output, which has been separated visually (in the commandline the lines starting with `>` are also in a different color) is just the signature. Changing it to `--hex` instead of `--sigonly` yields much the same output but with a different final result:
 
-    $ SIGNR_PASS=aoeu go run . -v -c sign --hex go.sum
+    SIGNR_PASS=aoeu go run . -v -c sign --hex go.sum
+
+which will return something like:
     
     > Using config file: /home/me/.signr/config.yaml
     > signing on message: signr_0_SHA256_SCHNORR_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
@@ -322,8 +352,10 @@ Again the input and output lines have been visually spaced as they are colorised
 
 Lastly, to illustrate what happens when a hash is provided instead of a file, the result is the same as these `--sigonly` and `--hex` versions but you don't specify a file, instead you just give it the hash in hexadecimal:
 
-    $ SIGNR_PASS=aoeu go run . -v -c sign --hex 830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+    SIGNR_PASS=aoeu go run . -v -c sign --hex 830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
 
+which will return something like:
+    
     > Using config file: /home/me/.signr/config.yaml
     > signing on message: signr_0_SHA256_SCHNORR_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
     > secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
@@ -332,8 +364,10 @@ Lastly, to illustrate what happens when a hash is provided instead of a file, th
     
 In the above the `--hex` flag is used, and we get the same raw hex as you saw above from the file (the example uses the current state of the `go.sum` file from the repository). If you explicitly use `--sigonly` or no flag at all, if the input is a hex (and again, for brevity, we are signing with the default signature, providing its password via environment variable), you get the `nsig` instead:
 
-    $ SIGNR_PASS=aoeu go run . -v -c sign 830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+    SIGNR_PASS=aoeu go run . -v -c sign 830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
 
+which will return something like:
+    
     > Using config file: /home/me/.signr/config.yaml
     > signing on message: signr_0_SHA256_SCHNORR_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
     > secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
