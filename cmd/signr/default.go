@@ -1,4 +1,4 @@
-package cmd
+package signr
 
 import (
 	"github.com/spf13/cobra"
@@ -22,7 +22,7 @@ either fingerprint or key name can be used to identify the key intended.
 			listkeysCmd.Run(cmd, args)
 			s.Fatal("\n")
 		}
-		if err := s.SetDefault(args[0]);err != nil {
+		if err := s.SetDefault(args[0]); err != nil {
 			s.Err("%s\n", err)
 			return
 		}

@@ -1,4 +1,4 @@
-package cmd
+package signr
 
 import (
 	"github.com/spf13/cobra"

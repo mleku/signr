@@ -1,4 +1,4 @@
-package cmd
+package signr
 
 import (
 	"github.com/spf13/cobra"
@@ -14,7 +14,7 @@ to actually delete a key, you must manually delete it in the filesystem. the fil
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if len(args)<1 {
+		if len(args) < 1 {
 			s.Fatal("key name is required\n")
 		}
 		err := s.Delete(args[0])

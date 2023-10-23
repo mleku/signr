@@ -1,8 +1,82 @@
 # signr
 
-Designed along similar lines to `ssh-keygen`, `signr` can generate new keys,
+designed along similar lines to `ssh-keygen`, `signr` can generate new keys,
 password protect them, keeping them in a directory with a familiar similar
 layout as `.ssh`, as well as sign and verify.
+
+## installing
+
+if your go installation is all set up, and you have done all the things, you should be able to install `signr` as so:
+
+    # go install github.com/mleku/signr
+
+### setting up your Go dev environment
+
+if you don't know what all the things are, then read on:
+
+#### download Go
+
+download a recent version of Go. as at writing, that's v1.20.10:
+
+find them here: https://go.dev/dl/
+
+no idea why they are calling 1.21 branch stable, since it's an odd numbered minor. they are WRONG, so get 1.20:
+
+    # cd ~/ # AKA: $HOME
+    # wget https://go.dev/dl/go1.20.10.linux-amd64.tar.gz
+
+i run from the source from the source repository of the original go source code (not github) but i'm not going to explain how to do that.
+
+mac users, just remember: apple loves you, and since i don't like apple, you are on your own. something something brew something tada. don't forget to install the xcode first of course.
+
+#### install Go
+
+then, unpack the binary distribution as so:
+
+    # tar xvf path/to/download/go1.20.10.linux-amd64.tar.gz
+
+#### configure your shell environment
+
+put the following lines at the end of your `~/.bashrc` or `~/.zshrc` or whatever your preferred shell's startup script is:
+
+    export GOBIN=$HOME/.local/bin
+    export GOPATH=$HOME
+    export GOROOT=$GOPATH/go
+    export PATH=$GOBIN:$GOROOT/bin:$PATH
+
+close your current shell session (ctrl-D) and log in again/open up a new session and you should be able to do this:
+
+    # go version
+    go version go1.20.10 linux/amd64
+
+#### get the source code
+
+assuming you have installed essentials git on your system... for that:
+
+##### arch linux
+
+    sudo pacman -S --noconfirm git wget curl base-devel
+
+##### debian/ubuntu/pop OS
+
+    sudo apt -y install build-essential git wget curl
+
+then clone the source code:
+
+    # git clone https://github.com/mleku/signr.git
+
+or if you have a github account, you can use the SSH link instead:
+
+    # git clone git@github.com:mleku/signr.git
+
+#### compile and install
+
+then you can run the following to place the `signr` binary in your $PATH:
+
+    # cd signr
+    # go install .
+
+to build the RPC API, go visit [pkg/protobufs/README.md](pkg/protobufs/README.md)
 
 ## usage
 
@@ -292,6 +366,7 @@ It provides the following functionality:
     - [x] validating filesystem security of keychain files and folder
     - [x] setting a default key to use when unspecified for signing
     - [x] encryption of private keys.
+- [ ] gRPC/Protobuf API
 
 In order to prevent cross-protocol attacks, the signature is applied not
 directly on the hash of the message, but rather a distinctive structure that
@@ -300,7 +375,7 @@ same hash functions and elliptic curves.
 
 ## Signing Material
 
-For want of a better name, `signr` does not sign directly on hashes of messages, but always a construction that includes a hex encoding of the hash, thus this is an intermediate step to producing a signature, as this "signing material" is then hashed to produce what is signed, and must be reconstructed if the protocol isolates the signature from the rest of the signing material.
+For want of a better name, `signr` does not sign directly on hashes of messages, but on "signing material", always a construction that includes a hex encoding of the hash, thus this is an intermediate step to producing a signature, as this **signing material** is then hashed to produce what is signed, and must be reconstructed if the protocol isolates the signature from the rest of the signing material.
 
 The raw bytes that are hashed using SHA256 are constructed as follows:
 

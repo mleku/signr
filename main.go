@@ -1,5 +1,5 @@
 package main
 
-import "github.com/mleku/signr/cmd"
+import "github.com/mleku/signr/cmd/signr"
 
-func main() { cmd.Execute() }
+func main() { signr.Execute() }

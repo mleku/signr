@@ -1,4 +1,4 @@
-package cmd
+package signr
 
 import (
 	"github.com/mleku/signr/pkg/signr"
@@ -11,7 +11,7 @@ var s *signr.Signr
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   signr.AppName,
-	Short: "A CLI key generator, importer, signer, verifier and keychain for Nostr keys",
+	Short: "signr - A CLI key generator, importer, signer, verifier and keychain for Nostr keys",
 	Long: `A command line interface for generating, importing, signing, verifying and managing keys used with the Nostr protocol.
 
 Designed to function in a similar way to ssh-keygen in that it keeps the keychain in a user directory with named key as pairs of files and a configuration file.
