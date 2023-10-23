@@ -183,7 +183,7 @@ If the first parameter is `-` signr assumes the file to be hashed will appear on
 
 Either of these options will produce a canonical binary blob/file signature thus:
 
-    go run . sign go.sum
+    signr sign go.sum
 
 which will return something like:
     
@@ -195,7 +195,7 @@ For other uses, it may be desired to only sign a hash and only get the signature
 
 If the first parameter is 64 characters long, and purely containing `0-9a-f` it will be interpreted as a hash and signed without the addition of the random number as with the `filename/-` and will return only the signature in bech32.
 
-    go run . sign --hex 5167fc037d96be70b809e3c669b7cb64864206273757f670af8f729beabf6ddc
+    signr sign --hex 5167fc037d96be70b809e3c669b7cb64864206273757f670af8f729beabf6ddc
 
 which will return something like:
 
@@ -220,7 +220,7 @@ rather than being signed directly on the provided value encoded as binary.
 
 To allow custom protocols to be devised, this can have an additional custom string using the `--custom` flag:
 
-    go run . -v sign --custom arbitrary-protocol-string go.sum
+    signr -v sign --custom arbitrary-protocol-string go.sum
 
 which will return something like:
     
@@ -231,7 +231,7 @@ which will return something like:
 
 The arbitrary custom string has any leading or following spaces or carriage returns removed:
 
-    go run . -v sign --custom "arbitrary protocol string 
+    signr -v sign --custom "arbitrary protocol string 
         " go.sum
 
 which will return something like:
@@ -245,7 +245,7 @@ which will return something like:
 
 Carriage returns as well, though these can only end up in the text very deliberately with a copy/paste or other programmatic method:
 
-    go run . -v sign --custom "arbitrary protocol string 
+    signr -v sign --custom "arbitrary protocol string 
         " go.sum
 
 which will return something like:
@@ -259,7 +259,7 @@ which will return something like:
 
 For completeness, the same thing except with a hash instead of a file:
 
-    go run . -v sign --custom "arbitrary protocol string 
+    signr -v sign --custom "arbitrary protocol string 
     " a61e297a6a401ceef85dff780e757d55016e402230a8c5e308fcb13cf4434f3a
 
 which will return something like:
@@ -277,7 +277,7 @@ The `verify` command with a filename or piped file input, plus a signature, or s
 
 A simple all-in-one example that covers a lot of the features involved, including a signing using an encrypted key with an environment variable, looks like this:
 
-    go run . -v -c verify go.sum `SIGNR_PASS=aoeu go run . -v -c sign go.sum`
+    signr -v -c verify go.sum `SIGNR_PASS=aoeu signr -v -c sign go.sum`
 
 which will return something like:
     
@@ -306,7 +306,7 @@ As you can see later on in the output, this text is repeated in the verification
 
 This example does not show the output of the embedded signing command, which looks like this:
 
-    SIGNR_PASS=aoeu go run . -v -c sign go.sum
+    SIGNR_PASS=aoeu signr -v -c sign go.sum
 
 which will return something like:
     
@@ -326,7 +326,7 @@ If the protocol separates things, then first of all, the nonce will not be used.
 
 When a raw hexadecimal hash is provided in place of a file, `signr` automatically changes its mode and will output either an `nsig` formatted signature alone, or a hexadecimal signature, as requested. These two look like this:
 
-    SIGNR_PASS=aoeu go run . -v -c sign --sigonly go.sum
+    SIGNR_PASS=aoeu signr -v -c sign --sigonly go.sum
 
 which will return something like:
     
@@ -338,7 +338,7 @@ which will return something like:
 
 As you can see, the final output, which has been separated visually (in the commandline the lines starting with `>` are also in a different color) is just the signature. Changing it to `--hex` instead of `--sigonly` yields much the same output but with a different final result:
 
-    SIGNR_PASS=aoeu go run . -v -c sign --hex go.sum
+    SIGNR_PASS=aoeu signr -v -c sign --hex go.sum
 
 which will return something like:
     
@@ -352,7 +352,7 @@ Again the input and output lines have been visually spaced as they are colorised
 
 Lastly, to illustrate what happens when a hash is provided instead of a file, the result is the same as these `--sigonly` and `--hex` versions but you don't specify a file, instead you just give it the hash in hexadecimal:
 
-    SIGNR_PASS=aoeu go run . -v -c sign --hex 830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+    SIGNR_PASS=aoeu signr -v -c sign --hex 830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
 
 which will return something like:
     
@@ -364,7 +364,7 @@ which will return something like:
     
 In the above the `--hex` flag is used, and we get the same raw hex as you saw above from the file (the example uses the current state of the `go.sum` file from the repository). If you explicitly use `--sigonly` or no flag at all, if the input is a hex (and again, for brevity, we are signing with the default signature, providing its password via environment variable), you get the `nsig` instead:
 
-    SIGNR_PASS=aoeu go run . -v -c sign 830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
+    SIGNR_PASS=aoeu signr -v -c sign 830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
 
 which will return something like:
     
