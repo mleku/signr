@@ -16,16 +16,21 @@ func (s *Signr) Generate(name string) (err error) {
 		return
 	}
 	secBytes := sec.Serialize()
-	npub, _ := nostr.PublicKeyToNpub(pub)
-	s.Log(
-		"generated key pair:\n"+
-			"\nhex:\n"+
-			"\tsecret: %s\n"+
-			"\tpublic: %s\n\n",
-		hex.EncodeToString(secBytes),
-		hex.EncodeToString(schnorr.SerializePubKey(pub)),
-	)
+	var npub string
+	npub, err = nostr.PublicKeyToNpub(pub)
+	if err != nil {
+		err = fmt.Errorf("error generating npub: %s", err)
+		return
+	}
 	if s.Verbose {
+		s.Log(
+			"generated key pair:\n"+
+				"\nhex:\n"+
+				"\tsecret: %s\n"+
+				"\tpublic: %s\n\n",
+			hex.EncodeToString(secBytes),
+			hex.EncodeToString(schnorr.SerializePubKey(pub)),
+		)
 		nsec, _ := nostr.SecretKeyToNsec(sec)
 		s.Log("nostr:\n"+
 			"\tsecret: %s\n"+

@@ -22,7 +22,7 @@ Use the filename '-' to indicate that the data is being piped in with < or |.
 If filename is in fact a 64 character hexadecimal value, it will be signed on without the nonce, and yield only a bech32 signature, or hexadecimal with the --hex flag.
 
 The sigonly option is the same as the hex option except the output signature is in nostr nsig Bech32 format.
-`,
+`+customInfo,
 	Run: func(cmd *cobra.Command, args []string) {
 		if signature, err := s.
 			Sign(args, Pass, Custom, Hex, OnlySig); err != nil {

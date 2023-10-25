@@ -98,21 +98,22 @@ func (s *Signr) AddCustom(ss []string,
 // finally replaces all remaining interstitial spaces with hyphens.
 func (s *Signr) Sanitize(in string) (out string, err error) {
 
+	out = in
 	// eliminate all non-printable characters first
-	in = strings.Map(func(r rune) rune {
+	out = strings.Map(func(r rune) rune {
 		if unicode.IsPrint(r) {
 			return r
 		}
 		return ' '
-	}, in)
+	}, out)
 	// all multiple non-printables then should be collapsed to single.
-	in = strings.Replace(in, "  ", " ", -1)
+	out = strings.Replace(out, "  ", " ", -1)
 	// leading and following space characters are removed
-	in = strings.TrimSpace(in)
+	out = strings.TrimSpace(out)
 	// spaces are not permitted in custom string, but they could be
 	// added, so they will be replaced with hyphens, as are underscores.
-	in = strings.ReplaceAll(in, " ", "-")
-	if len(in) < 1 {
+	out = strings.ReplaceAll(out, " ", "-")
+	if len(out) < 1 {
 		err = fmt.Errorf("empty string after sanitizing")
 	}
 	return
@@ -140,8 +141,9 @@ func (s *Signr) Log(format string, a ...interface{}) {
 	if !s.Verbose {
 		return
 	}
+	format = "> " + format
 	if s.Color {
-		format = color.C256(214).Sprint("> " + format)
+		format = color.C256(214).Sprint(format)
 	}
 	_, _ = fmt.Fprintf(os.Stderr, format, a...)
 }
@@ -150,7 +152,7 @@ func (s *Signr) Log(format string, a ...interface{}) {
 func (s *Signr) Err(format string, a ...interface{}) {
 
 	if s.Color {
-		format = color.Red.Sprint("⚠️ " + format + " ⚠️")
+		format = color.Red.Sprint(format)
 	}
 	_, _ = fmt.Fprintf(os.Stderr, format, a...)
 }

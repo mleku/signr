@@ -44,13 +44,13 @@ var listkeysCmd = &cobra.Command{
 		// add the rows after the spacers
 		grid = append(grid, tail...)
 		maxLen1++
-		s.Log("keys in keychain: (* = password protected)\n\n")
+		s.Info("keys in keychain: (* = password protected)\n\n")
 		cryptedStr := make(map[bool]string)
 		cryptedStr[true] = " "
 		cryptedStr[false] = "*"
 		for _, row := range grid {
 			_, clear := encrypted[row[0]]
-			s.Log("  %s %s %s\n",
+			s.Info("  %s %s %s\n",
 				cryptedStr[!clear],
 				PadToLength(row[0], maxLen1),
 				row[1]+defaultStr[row[0] == s.DefaultKey],

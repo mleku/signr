@@ -10,9 +10,11 @@ import (
 
 const PassPrompt = "type password to use for secret key (press enter for none): "
 
-func Equal(first, second []byte) (same bool) {
+func (s *Signr) Equal(first, second []byte) (same bool) {
 
 	if len(first) != len(second) {
+		s.Log("length of inputs differs: first: %d; second %d",
+			len(first) != len(second))
 		return
 	}
 	for i := range first {
@@ -48,13 +50,15 @@ func (s *Signr) Save(name string, secret []byte,
 	}
 	var pass1, pass2 []byte
 	var tryCount int
-	for tryCount < 3 {
+	const maxTries = 3
+	for tryCount < maxTries {
 		pass1, err = s.PasswordEntry(PassPrompt, s.PassEntryType)
 		if err != nil {
 			Zero(pass1)
 			err = fmt.Errorf("error in password input: %s", err)
 			return
 		}
+		s.Log("'%s'\n", pass1)
 		if len(pass1) == 0 {
 			pass2, err = s.PasswordEntry(
 				"again (press enter again to confirm no encryption): ",
@@ -67,22 +71,14 @@ func (s *Signr) Save(name string, secret []byte,
 			err = fmt.Errorf("error in password input: %s", err)
 			return
 		}
+		s.Log("'%s'\n", pass2)
 		if len(pass1) == 0 && len(pass2) == 0 {
 			s.Log("secret key will not be encrypted\n")
 			break
 		}
 		tryCount++
-		if Equal(pass1, pass2) {
-			s.Err(
-				"passwords don't match, try again (try %d of 3)\n",
-				tryCount+1)
-			// sanitation
-			Zero(pass1)
-			Zero(pass2)
-			continue
-		}
-		if matched := Equal(pass1, pass2); !matched {
-			s.Err("passwords didn't match, try again (try %d of 3)\n",
+		if matched := s.Equal(pass1, pass2); !matched {
+			s.Err("passwords didn't match, try again (try %d of %d)\n",
 				tryCount+1)
 			// sanitation
 			Zero(pass1)

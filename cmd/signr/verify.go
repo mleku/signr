@@ -24,7 +24,7 @@ use the filename '-' to indicate the file is being piped in via stdin.
 if the signature is a signature-only, whether as a parameter or in the referenced file, the pubkey must be provided by parameter or environment variable.
 
 if the consuming protocol requires an additional custom namespace, and was used when making a signature only, it must be passed in to construct the correct signing material for the message hash to check the signature against.		
-`,
+`+customInfo,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) < 2 {
@@ -54,6 +54,6 @@ func init() {
 	verifyCmd.PersistentFlags().StringVarP(&PubKey, "pubkey", "p", "",
 		"public key to check with if custom protocol omits it from the output")
 	verifyCmd.PersistentFlags().StringVarP(&Custom, "custom", "k", "",
-		"custom additional namespace")
+		"custom namespace separator")
 	rootCmd.AddCommand(verifyCmd)
 }

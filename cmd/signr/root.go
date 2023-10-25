@@ -8,11 +8,16 @@ import (
 
 var s *signr.Signr
 
+const customInfo = `The custom namespace string is sanitized, removing all non-printable/whitespace and removing any number of these characters found sequentially into a single hyphen "-" with all leading and following whitespace removed. The only limitation on the rest of the content of this parameter is that the remainder of the characters are designated as "printable" in the UTF-8 standard, this includes most punctuation and foreign language characters.
+`
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   signr.AppName,
 	Short: "signr - A CLI key generator, importer, signer, verifier and keychain for Nostr keys",
-	Long: `A command line interface for generating, importing, signing, verifying and managing keys used with the Nostr protocol.
+	Long: `signr
+
+A command line interface for generating, importing, signing, verifying and managing keys used with the Nostr protocol.
 
 Designed to function in a similar way to ssh-keygen in that it keeps the keychain in a user directory with named key as pairs of files and a configuration file.
 `,
