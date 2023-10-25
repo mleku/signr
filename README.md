@@ -59,8 +59,6 @@ which will print something like:
 
     go version go1.20.10 linux/amd64
 
-#### get the source code
-
 assuming you have installed essentials git on your system... for that:
 
 ##### arch linux
@@ -70,6 +68,8 @@ assuming you have installed essentials git on your system... for that:
 ##### debian/ubuntu/pop OS
 
     sudo apt -y install build-essential git wget curl
+
+#### get the source code
 
 then clone the source code:
 
@@ -98,24 +98,30 @@ The first thing to know is how to access the inbuilt help. The `signr` command b
 
 will print something like this:
 
-    signr - A command line interface for generating, importing, signing, verifying and managing keys used with the Nostr protocol.
+    signr
     
-    Designed to function in a similar way to ssh-keygen in that it keeps the keychain in a user directory with named key pairs and a configuration file.
+    A command line interface for generating, importing, signing, verifying and managing keys used with the Nostr protocol.
+    
+    Designed to function in a similar way to ssh-keygen in that it keeps the keychain in a user directory with named key as pairs of files and a configuration file.
     
     Usage:
       signr [command]
     
     Available Commands:
-      completion  Generate the autocompletion script for the specified shell
-      gen         Generate a new nostr key
-      help        Help about any command
-      import      Import a secret key
-      listkeys    List the keys in the keychain
-      set         Set configuration values from the CLI
-      sign        Generate a signature on a file
-      verify      check that a file matches a signature
+      anchor       generate required info to anchor a hash and signature on chain
+      completion   Generate the autocompletion script for the specified shell
+      delete       delete a named key
+      gen          Generate a new nostr key
+      help         Help about any command
+      import       Import a secret key
+      listkeys     List the keys in the keychain
+      set          Set configuration values from the CLI
+      sign         Generate a signature on a file or hash
+      verify       check that a file matches a signature
+      verifyanchor validate an on-chain anchor incription
     
     Flags:
+      -c, --color     prints more things
       -h, --help      help for signr
       -v, --verbose   prints more things
     
@@ -200,7 +206,7 @@ If the first parameter is 64 characters long, and purely containing `0-9a-f` it 
 which will return something like:
 
     type password to unlock encrypted secret key:
-
+    
     74ca3325925ef0de4006d80cf64aed379596a397850f4514f22baf0f30894149fa3d16d6fa7524271eeb88010d08febc699127a615c409881b7713ebd45c2605
 
 The signature will be printed in Bech32 by default, use the flag `--hex` to get a hexadecimal version:
@@ -254,7 +260,7 @@ which will return something like:
     signing on message: signr_0_SHA256_SCHNORR__d73d19ff8de5dcec_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
     type password to unlock encrypted secret key:
     secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
-
+    
     signr_0_SHA256_SCHNORR__d73d19ff8de5dcec_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_nsig1xucg87qfca6capz2j5mzw9lhkx3vm3j47htqqgp7z5nrvre950zzwr6n3udkwf0lz66lttxxh52n6hzptx6f8he40msngwk90ww9rhcgmfljx
 
 For completeness, the same thing except with a hash instead of a file:
@@ -333,7 +339,7 @@ which will return something like:
     > Using config file: /home/me/.signr/config.yaml
     > signing on message: signr_0_SHA256_SCHNORR_npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs_830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
     > secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
- 
+     
     nsig1sp0u578eds7mka2v4gxrrcyyzmpkm9vkrdp6ddyvr7sjrlxprjrrcd6m6y2cnq2c6pf2ze7utc4y877x94amludluxja52dvk9z88pg2hzgyr
 
 As you can see, the final output, which has been separated visually (in the commandline the lines starting with `>` are also in a different color) is just the signature. Changing it to `--hex` instead of `--sigonly` yields much the same output but with a different final result:
@@ -361,7 +367,7 @@ which will return something like:
     > secret decrypted: true; decrypted->pub: npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs, stored pub; npub1v79pv39a3asvwrcwct6qs6jpupr2uk707mz50c0ea7yrtg4jl32sxhhmvs
     
     805fca78f96c3dbb754caa0c31e08416c36d95961b43a6b48c1fa121fcc11c863c375bd115898158d052a167dc5e2a43fbc62d7bbff1bfe1a5da29acb1447385
-    
+
 In the above the `--hex` flag is used, and we get the same raw hex as you saw above from the file (the example uses the current state of the `go.sum` file from the repository). If you explicitly use `--sigonly` or no flag at all, if the input is a hex (and again, for brevity, we are signing with the default signature, providing its password via environment variable), you get the `nsig` instead:
 
     SIGNR_PASS=aoeu signr -v -c sign 830bcbdbcf0b55307030e0838752af4e79fecca4ee0d27602f8e6cba6239bd52
@@ -391,10 +397,12 @@ It provides the following functionality:
     - [x] piped via stdin
     - [x] on raw hash
     - [x] arbitrary custom namespace field
+    - [ ] anchors for Bitcoin/NOSTR inscriptions (WIF, NPUB, MERKLE/HASH, NSIG)
 - [x] Verification - checking a signature matches
     - [x] from file
     - [x] piped via stdin
     - [x] external additional pubkey and custom field for signature only
+    - [ ] verifying Bitcoin/NOSTR anchors (NPUB, MERKLE/HASH, NSIG)
 - [x] Keychain management
     - [x] storing keys in user profile
     - [x] validating filesystem security of keychain files and folder
