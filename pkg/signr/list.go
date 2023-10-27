@@ -88,6 +88,7 @@ func (s *Signr) GetList(g [][]string) (grid [][]string,
 		}
 		var pk *secp256k1.PublicKey
 		key := strings.TrimSpace(string(data))
+		s.Log("list '%s'\n", key)
 		if pk, err = nostr.NpubToPublicKey(key); err != nil {
 			s.Err("error decoding key '%s' %s: %v\n",
 				keySlice[i], pk, err)

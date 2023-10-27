@@ -29,7 +29,7 @@ From the NPUB, MERKLE and NSIG you can use the verifyanchor function to validate
 
 			s.Err("ERROR: while generating anchor: %s\n", err)
 		} else {
-			fmt.Printf("%s %s %s %s\n", wif, npub, merkle, nsig)
+			fmt.Printf("%s %s%s%s\n", wif, npub, merkle, nsig)
 		}
 	},
 }

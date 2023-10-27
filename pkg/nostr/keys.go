@@ -89,6 +89,7 @@ func NpubToPublicKey(encoded string) (pk *secp.PublicKey, err error) {
 	if err != nil {
 		return
 	}
+
 	return schnorr.ParsePubKey(b8[:32])
 }
 
