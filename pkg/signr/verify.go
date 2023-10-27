@@ -18,10 +18,16 @@ func (s *Signr) Verify(filename, sigOrSigFile, PubKey,
 	var signingStrings []string
 	var sig *schnorr.Signature
 	var sum []byte
+	var wasHash bool
 	pubKey = PubKey
 	// get the hash of the file that has been signed
-	if sum, err = HashFile(filename); err != nil {
+	if sum, wasHash, err = Hash(filename); err != nil {
 		err = fmt.Errorf("error getting hash of file/input: %s", err)
+		return
+	}
+	if wasHash {
+		err = fmt.Errorf("file '%s' does not exist and was also a valid 32 "+
+			"byte hexadecimal value", filename)
 		return
 	}
 	sumHex = hex.EncodeToString(sum)

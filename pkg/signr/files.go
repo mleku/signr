@@ -1,6 +1,8 @@
 package signr
 
-import "os"
+import (
+	"os"
+)
 
 func CheckFileExists(name string) (fi os.FileInfo, exists bool, err error) {
 

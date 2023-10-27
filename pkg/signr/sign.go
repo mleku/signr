@@ -50,9 +50,10 @@ import (
 // form. This is implicitly used if the first 'args' parameter is a 64 character
 // long hash in hex format.
 func (s *Signr) Sign(args []string, pass, custom string,
-	asHex, sigOnly bool) (sigStr string, err error) {
+	asHex, sigOnly bool) (sigStr string, key *secp.SecretKey, err error) {
 
 	signingKey := s.DefaultKey
+	s.Log("signing with: %s\n", signingKey)
 	filename := args[0]
 	switch {
 	case len(args) < 1:
@@ -79,31 +80,22 @@ func (s *Signr) Sign(args []string, pass, custom string,
 	}
 	signingStrings := GetDefaultSigningStrings()
 	signingStrings = s.AddCustom(signingStrings, custom)
-	var skipRandomness bool
-	if sigOnly || asHex {
-		skipRandomness = true
-	}
 	// if the command line contains a raw hash we assume that a simple
 	// signature on this is intended. it will still use the namespacing, the
 	// pubkey and any custom string, but not the nonce. it is assumed that
 	// the protocol generating the hash has accounted for sufficient
 	// entropy.
 	var sum []byte
-	if len(filename) == 64 {
-		sum, err = hex.DecodeString(filename)
-		if err == nil {
-			skipRandomness = true
-		}
-	}
+	var isHash bool
 	// hash the file
-	if len(sum) == 0 {
-		if sum, err = HashFile(filename); err != nil {
-			err = fmt.Errorf("error while generating hash on file/input: %s",
-				err)
-			return
-		}
+	if sum, isHash, err = Hash(filename); err != nil {
+		err = fmt.Errorf("error while generating hash on file/input: %s",
+			err)
+		return
 	}
-	if !skipRandomness {
+	// if isHash, sigOnly or asHex are true we won't use a nonce
+	isHash = isHash || sigOnly || asHex
+	if !isHash {
 		// add the signature nonce
 		var nonce string
 		if nonce, err = s.GetNonceHex(); err != nil {
@@ -128,7 +120,6 @@ func (s *Signr) Sign(args []string, pass, custom string,
 	message := strings.Join(signingStrings, "_")
 	s.Log("signing on message: %s\n", message)
 	messageHash := sha256.Sum256([]byte(message))
-	var key *secp.SecretKey
 	if key, err = s.GetKey(signingKey, pass); err != nil {
 		return
 	}
@@ -137,7 +128,7 @@ func (s *Signr) Sign(args []string, pass, custom string,
 		err = fmt.Errorf("ERROR: while signing: '%s'", err)
 		return
 	}
-	if skipRandomness {
+	if isHash {
 		if asHex {
 			sigStr = hex.EncodeToString(sig.Serialize())
 		} else {
