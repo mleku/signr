@@ -3,13 +3,13 @@ package btc
 import (
 	"fmt"
 
-	"github.com/btcsuite/btcd/btcutil"
-	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/minio/sha256-simd"
 	"github.com/mleku/base58"
 	btcec "github.com/mleku/ec"
+	"github.com/mleku/ec/chaincfg"
 	"github.com/mleku/ec/chainhash"
 	secp "github.com/mleku/ec/secp"
+	"github.com/mleku/ec/taproot"
 )
 
 const (
@@ -64,8 +64,8 @@ func GetTaprootAddress(sk *secp.SecretKey,
 
 	tapSecKey := btcec.SecKeyFromScalar(skScalar.Add(&tweakScalar))
 	tapPubKey := tapSecKey.PubKey()
-	var tapAddr *btcutil.AddressTaproot
-	tapAddr, err = btcutil.NewAddressTaproot(tapPubKey.SerializeCompressed(),
+	var tapAddr *taproot.AddressTaproot
+	tapAddr, err = taproot.NewAddressTaproot(tapPubKey.SerializeCompressed(),
 		&chaincfg.MainNetParams)
 	if err != nil {
 		err = fmt.Errorf("error creating taproot address: %s", err)
