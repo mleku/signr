@@ -13,8 +13,9 @@ var importCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		argLen := len(args)
-		if argLen == 1 {
-			s.Fatal("a key name is required after the secret key")
+		if argLen < 2 {
+			cmd.Help()
+			s.Fatal("error: two parameters required\n")
 		}
 		if err := s.Import(args[0], args[1]); err != nil {
 			s.Fatal("ERROR: while importing: '%s'\n", err)

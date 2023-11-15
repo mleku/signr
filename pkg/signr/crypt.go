@@ -16,7 +16,7 @@ const UnlockPrompt = "type password to unlock encrypted secret key"
 
 // GetKey scans the keychain for a named key, with optional password string to
 // decrypt the key in the file in the keychain.
-func (s *Signr) GetKey(name, passStr string) (key *secp.SecretKey,
+func (s *Signr) GetKey(name, passStr string) (secKey *secp.SecretKey,
 	err error) {
 
 	var keyBytes []byte
@@ -51,7 +51,7 @@ func (s *Signr) GetKey(name, passStr string) (key *secp.SecretKey,
 	}
 	if passStr != "" {
 		copy(secret, originalSecret)
-		if key, err = s.
+		if secKey, err = s.
 			DeriveAndCheckKey(name, secret, []byte(passStr)); err != nil {
 			s.Err("password failed to unlock key: %s\n", err)
 			return
@@ -72,7 +72,7 @@ func (s *Signr) GetKey(name, passStr string) (key *secp.SecretKey,
 				s.Err("error in password input: '%s'\n", err)
 				continue
 			}
-			if key, err = s.
+			if secKey, err = s.
 				DeriveAndCheckKey(name, secret, pass); err != nil {
 				tryCount++
 				continue
@@ -81,7 +81,7 @@ func (s *Signr) GetKey(name, passStr string) (key *secp.SecretKey,
 			}
 		}
 	} else {
-		key = secp.SecKeyFromBytes(originalSecret)
+		secKey = secp.SecKeyFromBytes(originalSecret)
 	}
 	return
 }
