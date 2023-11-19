@@ -358,6 +358,59 @@ This 256 character blob (128 bytes) can then be verified by itself using `verify
     
     VALID
 
+### vanity
+
+Vanity keys can be generated with `signr` - these are created by exhaustively generating secret keys, deriving the public key using the Schnorr algorithm, encoding to the Bech32 `npub` format and searching the string for a match.
+
+The bech32 symbol set is as follows: 
+
+    023456789acdefghjklmnpqrstuvwxyz
+
+This list sorted by lexicographical order for human readability, the real set has a specific order indicating the 5 bit value of each `qpzry9x8gf2tvdw0s3jn54khce6mua7l` but this is harder for a human to identify the available symbols.
+
+> Basically it eliminates all ambiguous symbols, O, o and 0 only the last (zero), and 1, I and l, again, only the last (small L). Some fonts it is very hard to visually distinguish the symbols and this selection also assumes lower case alphabetical characters, the 5 and S and 2 and Z are otherwise close to conflict. In some fonts the i and j are very close, with no hook on the J, but for the most part this scheme avoids the most frequent confused glyphs.
+>
+> Essentially the letters I and O would have to be substituted with small L or 0 (zero) as a guide to how to cope with the limitation. Thus for a number you'd use `l0` to represent 10 and a word like `loki` would be `l0kl` (i = l, o = 0)
+>
+> If Bech32 had been designed with vanity addresses in mind they would have selected i and o (small I and small O) and had a complete latin alphabet but this was not part of their decision criteria.
+
+The vanity function allows you to specify an arbitrary length string composed of the above symbols, which for the most part enables the embedding of human readable words into the public key.
+
+To generate a vanity key:
+
+    $ go run . vanity mmm mlk
+    generated in 6949 attempts
+    $
+
+The longer the desired string, the longer it will take, on average, to find a key match.
+
+The help information is as follows:
+
+    $ go run . help vanity
+    Generates a new nostr key that begins with, contains, or ends with a given string.
+    
+    Vanity keys are a kind of proof of work. They take time to generate and are easier to identify for humans.
+    
+    The longer the <string> the longer it will take to generate it.
+    
+    If the final position spec is omitted, the search will look for the beginning.
+    
+    Usage:
+      signr vanity <string> <name> [begin|contain|end] [flags]
+    
+    Flags:
+      -h, --help   help for vanity
+    
+    Global Flags:
+      -c, --color     prints more things
+      -v, --verbose   prints more things
+
+There is 3 options for string position in the search, `begin`, `contain` and `end`. This is a positional parameter that is the third, after the search string, and the key name.
+
+`begin` means after the `npub1` - all keys have `npub1` in front of them due to Bech32 encoding, so if a match for this is found, it appears after it.
+
+`end` means that the string is at the end of the public key. `contain` includes both `begin` and `end` and the string will apear at any position. This setting makes for a less recognisable key - beginning and end are more likely to be noticed by humans, but has the benefit of being more likely to find, and thus perhaps suitable for a longer string.
+
 ### advanced usage
 
 If the protocol separates things, then first of all, the nonce will not be used. The protocol would need to use the `--custom` feature to embed any extra strings, which are sanitised to be only printable characters with single spaces represented as hyphens.

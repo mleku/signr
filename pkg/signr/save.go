@@ -40,7 +40,8 @@ func (s *Signr) Save(name string, secret []byte,
 	var exists bool
 	_, exists, err = CheckFileExists(newPath)
 	if err != nil {
-		err = fmt.Errorf("error checking for existence of file %s: %s", newPath, err)
+		err = fmt.Errorf("error checking for existence of file %s: %s", newPath,
+			err)
 		return
 	}
 	if exists {
@@ -58,10 +59,10 @@ func (s *Signr) Save(name string, secret []byte,
 			err = fmt.Errorf("error in password input: %s", err)
 			return
 		}
-		s.Log("'%s'\n", pass1)
+		// s.Log("'%s'\n", pass1)
 		if len(pass1) == 0 {
 			pass2, err = s.PasswordEntry(
-				"again (press enter again to confirm no encryption): ",
+				"again (press enter \nagain to confirm no encryption): ",
 				s.PassEntryType)
 		} else {
 			pass2, err = s.PasswordEntry("again: ", s.PassEntryType)
@@ -71,7 +72,7 @@ func (s *Signr) Save(name string, secret []byte,
 			err = fmt.Errorf("error in password input: %s", err)
 			return
 		}
-		s.Log("'%s'\n", pass2)
+		// s.Log("'%s'\n", pass2)
 		if len(pass1) == 0 && len(pass2) == 0 {
 			s.Log("secret key will not be encrypted\n")
 			break
