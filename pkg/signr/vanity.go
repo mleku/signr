@@ -47,8 +47,7 @@ func (s *Signr) Vanity(str, name string, where Position) (err error) {
 		counter++
 		sec, pub, err = s.GenKeyPair()
 		if err != nil {
-			err = fmt.Errorf("error generating key: %s", err)
-			return
+			return fmt.Errorf("error generating key: %s", err)
 		}
 		npub, err = nostr.PublicKeyToNpub(pub)
 		if err != nil {
@@ -68,6 +67,9 @@ func (s *Signr) Vanity(str, name string, where Position) (err error) {
 			if strings.Contains(npub, str) {
 				found = true
 			}
+		}
+		if counter%1000000 == 0 {
+			s.Log("attempt %d\n", counter)
 		}
 	}
 	s.Info("generated in %d attempts\n", counter)
