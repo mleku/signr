@@ -6,6 +6,7 @@ import (
 	"github.com/mleku/bech32"
 	secp "github.com/mleku/ec/secp"
 	"strings"
+	"time"
 
 	"github.com/mleku/ec/schnorr"
 	"github.com/mleku/signr/pkg/nostr"
@@ -43,6 +44,7 @@ func (s *Signr) Vanity(str, name string, where Position) (err error) {
 	var pub *secp.PublicKey
 	var counter int
 	var npub string
+	started := time.Now()
 	for !found {
 		counter++
 		sec, pub, err = s.GenKeyPair()
@@ -72,7 +74,8 @@ func (s *Signr) Vanity(str, name string, where Position) (err error) {
 			s.Log("attempt %d\n", counter)
 		}
 	}
-	s.Info("generated in %d attempts\n", counter)
+	s.Info("generated in %d attempts, taking %v\n", counter,
+		started.Sub(time.Now()))
 	secBytes := sec.Serialize()
 	if s.Verbose {
 		s.Log(
