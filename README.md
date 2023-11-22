@@ -8,7 +8,7 @@ layout as `.ssh`, as well as sign and verify.
 
 if your go installation is all set up, and you have done all the things, you should be able to install `signr` as so:
 
-    go install github.com/mleku/signr
+    go install github.com/mleku/signr@v1.3.2
 
 ### setting up your Go dev environment
 
