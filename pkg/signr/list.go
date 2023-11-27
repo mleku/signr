@@ -8,10 +8,10 @@ import (
 	"strings"
 
 	"github.com/minio/sha256-simd"
-	"github.com/mleku/ec/schnorr"
-	secp256k1 "github.com/mleku/ec/secp"
-	"github.com/mleku/signr/pkg/nostr"
 	"github.com/pkg/errors"
+	"mleku.online/git/ec/schnorr"
+	secp256k1 "mleku.online/git/ec/secp"
+	"mleku.online/git/signr/pkg/nostr"
 )
 
 func (s *Signr) GetKeyPairNames() (list []string, err error) {

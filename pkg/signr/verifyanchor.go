@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/minio/sha256-simd"
-	"github.com/mleku/ec/schnorr"
-	secp "github.com/mleku/ec/secp"
-	"github.com/mleku/signr/pkg/nostr"
+	"mleku.online/git/ec/schnorr"
+	secp "mleku.online/git/ec/secp"
+	"mleku.online/git/signr/pkg/nostr"
 )
 
 // VerifyAnchor takes in the 3 elements found in an anchor transaction
@@ -32,19 +32,22 @@ func (s *Signr) VerifyAnchor(input, custom string) (valid bool, err error) {
 	var pubBytes, sigBytes []byte
 	pubBytes, err = hex.DecodeString(NPUB)
 	if err != nil {
-		err = fmt.Errorf("error: unable to decode public key segment '%s': %s", NPUB, err)
+		err = fmt.Errorf("error: unable to decode public key segment '%s': %s",
+			NPUB, err)
 		return
 	}
 
 	// this only needs to be checked that it is valid hex as it is used as is.
 	_, err = hex.DecodeString(merkle)
 	if err != nil {
-		err = fmt.Errorf("error: unable to decode merkle root segment '%s': %s", merkle, err)
+		err = fmt.Errorf("error: unable to decode merkle root segment '%s': %s",
+			merkle, err)
 		return
 	}
 	sigBytes, err = hex.DecodeString(nsig)
 	if err != nil {
-		err = fmt.Errorf("error: unable to decode signature segment '%s': %s", nsig, err)
+		err = fmt.Errorf("error: unable to decode signature segment '%s': %s",
+			nsig, err)
 		return
 	}
 

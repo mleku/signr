@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mleku/ec/schnorr"
-	secp "github.com/mleku/ec/secp"
-	"github.com/mleku/signr/pkg/nostr"
+	"mleku.online/git/ec/schnorr"
+	secp "mleku.online/git/ec/secp"
+	"mleku.online/git/signr/pkg/nostr"
 )
 
 func (s *Signr) Import(secKey, name string) (err error) {

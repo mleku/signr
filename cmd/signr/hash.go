@@ -4,8 +4,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/mleku/signr/pkg/signr"
 	"github.com/spf13/cobra"
+	"mleku.online/git/signr/pkg/signr"
 )
 
 var hashCmd = &cobra.Command{

@@ -4,10 +4,10 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/mleku/ec/schnorr"
-	secp "github.com/mleku/ec/secp"
-	"github.com/mleku/signr/pkg/nostr"
 	"github.com/spf13/cobra"
+	"mleku.online/git/ec/schnorr"
+	secp "mleku.online/git/ec/secp"
+	"mleku.online/git/signr/pkg/nostr"
 )
 
 var showCmd = &cobra.Command{

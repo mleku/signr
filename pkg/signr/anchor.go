@@ -4,9 +4,9 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/mleku/ec/schnorr"
-	secp "github.com/mleku/ec/secp"
-	"github.com/mleku/signr/pkg/btc"
+	"mleku.online/git/ec/schnorr"
+	secp "mleku.online/git/ec/secp"
+	"mleku.online/git/signr/pkg/btc"
 )
 
 func (s *Signr) GetAnchor(args []string, pass, custom string) (WIF,
@@ -15,7 +15,8 @@ func (s *Signr) GetAnchor(args []string, pass, custom string) (WIF,
 	// args[0] should be a 32 byte hash, presumably a merkle root
 	MERKLE = args[0]
 	if len(MERKLE) != 64 {
-		err = fmt.Errorf("merkle/hash not expected length of 32 byes/64 hex characters, got %d characters", len(MERKLE))
+		err = fmt.Errorf("merkle/hash not expected length of 32 byes/64 hex characters, got %d characters",
+			len(MERKLE))
 		return
 	}
 	var merkleBytes []byte
@@ -34,7 +35,8 @@ func (s *Signr) GetAnchor(args []string, pass, custom string) (WIF,
 		keyName = s.DefaultKey
 	}
 	var key *secp.SecretKey
-	NSIG, key, err = s.Sign([]string{MERKLE, keyName}, pass, custom, true, false)
+	NSIG, key, err = s.Sign([]string{MERKLE, keyName}, pass, custom, true,
+		false)
 	if err != nil {
 		err = fmt.Errorf("error signing merkle/hash: %s", err)
 		return

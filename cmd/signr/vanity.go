@@ -1,8 +1,8 @@
 package signr
 
 import (
-	"github.com/mleku/signr/pkg/signr"
 	"github.com/spf13/cobra"
+	"mleku.online/git/signr/pkg/signr"
 	"strings"
 )
 

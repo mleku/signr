@@ -3,8 +3,9 @@ package signr
 import (
 	"fmt"
 	"os"
+	"runtime"
 
-	"github.com/mleku/appdata"
+	"mleku.online/git/appdata"
 )
 
 // Signr stores the configuration for signr.
@@ -26,7 +27,7 @@ type Signr struct {
 func Init(passEntryType int) (s *Signr, err error) {
 
 	s = &Signr{PassEntryType: passEntryType}
-	s.DataDir = appdata.GetDataDir(AppName, false)
+	s.DataDir = appdata.GetDataDir(runtime.GOOS, AppName, false)
 	fi, exists, err := CheckFileExists(s.DataDir)
 	if err != nil {
 		err = fmt.Errorf("error checking if datadir exists: %s", err)

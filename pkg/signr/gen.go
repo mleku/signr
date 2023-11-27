@@ -4,8 +4,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/mleku/ec/schnorr"
-	"github.com/mleku/signr/pkg/nostr"
+	"mleku.online/git/ec/schnorr"
+	"mleku.online/git/signr/pkg/nostr"
 )
 
 func (s *Signr) Generate(name string) (err error) {

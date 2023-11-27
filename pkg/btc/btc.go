@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/minio/sha256-simd"
-	"github.com/mleku/base58"
-	btcec "github.com/mleku/ec"
-	"github.com/mleku/ec/chaincfg"
-	"github.com/mleku/ec/chainhash"
-	secp "github.com/mleku/ec/secp"
-	"github.com/mleku/ec/taproot"
+	"mleku.online/git/base58"
+	btcec "mleku.online/git/ec"
+	"mleku.online/git/ec/chaincfg"
+	"mleku.online/git/ec/chainhash"
+	secp "mleku.online/git/ec/secp"
+	"mleku.online/git/ec/taproot"
 )
 
 const (
@@ -34,9 +34,9 @@ func GetWIF(sk *secp.SecretKey) (secKey string) {
 	return
 }
 
-// GetTaprootKeys takes a signr secret key and generates the taproot secret and
-// public keys for a generic spend, as can be used to embed a signature in the
-// witness.
+// GetTaprootAddress takes a signr secret key and generates the taproot secret
+// and public keys for a generic spend, as can be used to embed a signature in
+// the witness.
 //
 // This reimplements the functionality in
 // github.com/btcsuite/btcd/txscript/taproot.go except without using btcd and

@@ -8,7 +8,7 @@ layout as `.ssh`, as well as sign and verify.
 
 if your go installation is all set up, and you have done all the things, you should be able to install `signr` as so:
 
-    go install github.com/mleku/signr@v1.3.2
+    go install mleku.online/git/signr@v1.3.2
 
 ### setting up your Go dev environment
 
@@ -73,7 +73,7 @@ assuming you have installed essentials git on your system... for that:
 
 then clone the source code:
 
-    git clone https://github.com/mleku/signr.git
+    git clone https://mleku.online/git/signr.git
 
 or if you have a github account, you can use the SSH link instead:
 

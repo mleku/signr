@@ -1,9 +1,9 @@
 package signr
 
 import (
-	"github.com/mleku/signr/pkg/signr"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"mleku.online/git/signr/pkg/signr"
 )
 
 var s *signr.Signr

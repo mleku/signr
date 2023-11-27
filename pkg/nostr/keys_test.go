@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/minio/sha256-simd"
-	"github.com/mleku/ec/schnorr"
-	secp256k1 "github.com/mleku/ec/secp"
+	"mleku.online/git/ec/schnorr"
+	secp256k1 "mleku.online/git/ec/secp"
 )
 
 func TestConvertBits(t *testing.T) {
@@ -57,14 +57,17 @@ func TestSecretKeyToNsec(t *testing.T) {
 		}
 		reSecBytes = reSec.Serialize()
 		if string(secBytes) != string(reSecBytes) {
-			t.Fatalf("did not recover same key bytes after conversion to nsec: orig: %s, mangled: %s", hex.EncodeToString(secBytes), hex.EncodeToString(reSecBytes))
+			t.Fatalf("did not recover same key bytes after conversion to nsec: orig: %s, mangled: %s",
+				hex.EncodeToString(secBytes), hex.EncodeToString(reSecBytes))
 		}
 		reNsec, err = SecretKeyToNsec(reSec)
 		if err != nil {
-			t.Fatalf("error recovered secret key from converted to nsec: %s", err)
+			t.Fatalf("error recovered secret key from converted to nsec: %s",
+				err)
 		}
 		if reNsec != nsec {
-			t.Fatalf("recovered secret key did not regenerate nsec of original: %s mangled: %s", reNsec, nsec)
+			t.Fatalf("recovered secret key did not regenerate nsec of original: %s mangled: %s",
+				reNsec, nsec)
 		}
 	}
 }
@@ -101,10 +104,12 @@ func TestPublicKeyToNpub(t *testing.T) {
 		}
 		reNpub, err = PublicKeyToNpub(rePub)
 		if err != nil {
-			t.Fatalf("error recovered secret key from converted to nsec: %s", err)
+			t.Fatalf("error recovered secret key from converted to nsec: %s",
+				err)
 		}
 		if reNpub != npub {
-			t.Fatalf("recovered public key did not regenerate npub of original: %s mangled: %s", reNpub, npub)
+			t.Fatalf("recovered public key did not regenerate npub of original: %s mangled: %s",
+				reNpub, npub)
 		}
 	}
 }

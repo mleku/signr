@@ -3,13 +3,13 @@ package signr
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/mleku/bech32"
-	secp "github.com/mleku/ec/secp"
+	"mleku.online/git/bech32"
+	secp "mleku.online/git/ec/secp"
 	"strings"
 	"time"
 
-	"github.com/mleku/ec/schnorr"
-	"github.com/mleku/signr/pkg/nostr"
+	"mleku.online/git/ec/schnorr"
+	"mleku.online/git/signr/pkg/nostr"
 )
 
 type Position int

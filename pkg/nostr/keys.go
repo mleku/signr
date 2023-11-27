@@ -3,9 +3,9 @@ package nostr
 import (
 	"fmt"
 
-	"github.com/mleku/bech32"
-	"github.com/mleku/ec/schnorr"
-	secp "github.com/mleku/ec/secp"
+	"mleku.online/git/bech32"
+	"mleku.online/git/ec/schnorr"
+	secp "mleku.online/git/ec/secp"
 )
 
 const (

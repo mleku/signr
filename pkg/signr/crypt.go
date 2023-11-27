@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	secp "github.com/mleku/ec/secp"
-	"github.com/mleku/signr/pkg/nostr"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/argon2"
+	secp "mleku.online/git/ec/secp"
+	"mleku.online/git/signr/pkg/nostr"
 )
 
 const UnlockPrompt = "type password to unlock encrypted secret key"
