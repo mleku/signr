@@ -44,7 +44,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&s.Verbose,
 		"verbose", "v", false, "prints more things")
 	rootCmd.PersistentFlags().BoolVarP(&s.Color,
-		"color", "c", false, "prints more things")
+		"color", "c", false, "prints color things")
 	cobra.OnInitialize(initConfig(s))
 }
 
