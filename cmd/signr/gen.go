@@ -23,9 +23,12 @@ the name should be relevant to the purpose of the key, cannot contain any non-pr
 			s.Fatal("key name failed sanitizing: %s\n", keyName)
 		}
 		if keyName != args[0] {
-			s.Fatal("key name input is invalid - sanitizing it changed it, was '%s' changed to '%s'\n", args[0], keyName)
+			s.Fatal("key name input is invalid - sanitizing it changed it, "+
+				"was '%s' changed to '%s'\n", args[0], keyName)
 		}
-		s.Generate(keyName)
+		if err = s.Generate(keyName); err != nil {
+			s.Fatal("error generating key: %s\n", err)
+		}
 	},
 }
 

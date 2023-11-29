@@ -8,7 +8,7 @@ layout as `.ssh`, as well as sign and verify.
 
 if your go installation is all set up, and you have done all the things, you should be able to install `signr` as so:
 
-    go install mleku.online/git/signr@v1.3.2
+    go install mleku.online/git/signr@latest
 
 ### setting up your Go dev environment
 
@@ -153,6 +153,16 @@ The subcommand version (first) is more intuitive and fluid especially if you are
 
 A name is required when generating a new key. As contrasted with the interface of ssh, where naming new keys is optional, it is mandatory in `signr` because we want users to think of this as a keychain in the first class sense, and to be able to use it this way.
 
+You will also be asked if you want to encrypt the key. 
+
+> This password is hashed repeatedly using the Argon 2 key derivation algorithm with the following parameters:
+>
+> salt is `signr` (this is a namespace parameter), 3 seconds derivation time, 1048576 bytes of memory (1 megabyte), 4 threads and generates a 32 byte value that is XORed with the private key bytes (which are 32 bytes long).
+>
+> Specification is provided here so the encrypted key bytes could be decrypted by another implementation that follows the same parameters for deriving the encryption key.
+
+>  TODO: encryption of key requires use of CLI to handle password input, though decryption can be done using `SIGNR_PASS` environment variable.
+
 The first key generated will also become the default key, which can be changed using the `set` command.
 
 After running gen, you will now have three files in a new subdirectory `~/.signr`:
@@ -167,7 +177,15 @@ After running gen, you will now have three files in a new subdirectory `~/.signr
 
 If you use the same name in this command as an existing key, it will refuse to create a key, explaining that the name is taken.
 
-A delete command is provided, that renames the key with a random additional string before an added extension `.del` and if you REALLY must delete it, you can use `rm ~/.signr/keyname.123abc.del.*` (todo: wip)
+A delete command is provided, that renames the key with a random additional string before an added extension `.del` and if you REALLY must delete it, you can use `rm ~/.signr/keyname.123abc.del.*` 
+
+>  `123abc` is a placeholder for the random hex string that will be used to isolate the deleted file from any other same named deleted key.
+
+#### password protection of keys
+
+>  todo: currently there is no way to pass in the encryption key with the `gen` command
+
+If you made a
 
 ### set default
 
@@ -176,6 +194,42 @@ The first key is default, and this enables you to omit the key name when perform
     signr set default newdefaultkey
 
 This checks the `newdefaultkey` exists and then modifies the `config.yaml` to reflect the new status. After this, sign operations without a key named will use this key.
+
+### show
+
+To view the public keys, you can simply open or cat the relevant named file under `~/.signr/<keyname>.pub`, however, if you need to see also the private key, you can use the `show` command:
+
+    $ signr help show
+
+which will return something like:
+
+    prints out the hex secret and public key and npub/nsec for use elsewhere, using
+    the common shell environment variables format.
+    
+    Usage:
+      signr show <name> [flags]
+    
+    Flags:
+      -h, --help   help for show
+    
+    Global Flags:
+      -c, --color     prints color things
+      -v, --verbose   prints more things
+
+If the key is encrypted, you will either need to type in the password at the prompt, or you can provide it via an environment variable `SIGNR_PASS` as described in the previous section.
+
+The output of the `show` command is in a form that can be used as environment variables:
+
+    $ signr show a1
+
+which will return something like:
+
+    SIGNR_SECRET_KEY=nsec1z7tlduw3qkf4fz6kdw3jaq2h02jtexgwkrck244l3p834a930sjsh8t89c
+    SIGNR_PUBLIC_KEY=npub1flds0h62dqlra6dj48g30cqmlcj534lgcr2vk4kh06wzxzgu8lpss5kaa2
+    SIGNR_HEX_SECRET_KEY=1797f6f1d10593548b566ba32e81577aa4bc990eb0f16556bf884f1af4b17c25
+    SIGNR_HEX_PUBLIC_KEY=4fdb07df4a683e3ee9b2a9d117e01bfe2548d7e8c0d4cb56d77e9c23091c3fc3
+
+> todo: provide a parameter to change the first part of the environment variable string for the case of needing multiple such environment variables for separate purposes.
 
 ### sign
 
