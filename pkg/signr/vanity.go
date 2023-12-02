@@ -3,12 +3,16 @@ package signr
 import (
 	"encoding/hex"
 	"fmt"
+	"mleku.online/git/atomic"
 	"mleku.online/git/bech32"
 	secp "mleku.online/git/ec/secp"
+	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"mleku.online/git/ec/schnorr"
+	"mleku.online/git/interrupt"
 	"mleku.online/git/qu"
 	"mleku.online/git/signr/pkg/nostr"
 )
@@ -23,8 +27,16 @@ const (
 	PositionEnding
 )
 
-func (s *Signr) Vanity(str, name string, where Position) (e error) {
+type Result struct {
+	sec  *secp.SecretKey
+	npub string
+	pub  *secp.PublicKey
+}
 
+func (s *Signr) Vanity(str, name string, where Position,
+	threads int) (e error) {
+
+	qu.SetLogging(true)
 	// check the string has valid bech32 ciphers
 	for i := range str {
 		wrong := true
@@ -39,35 +51,65 @@ func (s *Signr) Vanity(str, name string, where Position) (e error) {
 				str[i], bech32.Charset)
 		}
 	}
-
 	started := time.Now()
+	quit, shutdown := qu.T(), qu.T()
+	resC := make(chan Result)
+	interrupt.AddHandler(func() {
+		// this will stop work if CTRL-C or Interrupt signal from OS.
+		shutdown.Q()
+	})
+	var wg sync.WaitGroup
+	counter := atomic.NewInt64(0)
+	for i := 0; i < threads; i++ {
+		s.Log("starting up worker %d\n", i)
+		go s.mine(str, where, quit, resC, &wg, counter)
+	}
+	tick := time.NewTicker(time.Second * 5)
+	var res Result
+out:
+	for {
+		select {
+		case <-tick.C:
+			workingFor := time.Now().Sub(started)
+			wm := workingFor % time.Second
+			workingFor -= wm
+			s.Log("working for %v, attempt %d\n",
+				workingFor, counter.Load())
+		case r := <-resC:
+			// one of the workers found the solution
+			res = r
+			// tell the others to stop
+			quit.Q()
+			break out
+		case <-shutdown.Wait():
+			quit.Q()
+			s.Info("\ninterrupt signal received\n")
+			os.Exit(0)
+		}
+	}
 
-	quit := qu.T()
-	var sec *secp.SecretKey
-	var counter int
-	var npub string
-	var pub *secp.PublicKey
-	sec, pub, npub, counter, e = s.mine(str, where, quit)
+	// wait for all of the workers to stop
+	wg.Wait()
 
-	s.Info("generated in %d attempts, taking %v\n", counter,
-		started.Sub(time.Now()))
-	secBytes := sec.Serialize()
-	if s.Verbose {
+	s.Info("generated in %d attempts, taking %v\n", counter.Load(),
+		time.Now().Sub(started))
+	secBytes := res.sec.Serialize()
+	if s.Verbose.Load() {
 		s.Log(
 			"generated key pair:\n"+
 				"\nhex:\n"+
 				"\tsecret: %s\n"+
 				"\tpublic: %s\n\n",
 			hex.EncodeToString(secBytes),
-			hex.EncodeToString(schnorr.SerializePubKey(pub)),
+			hex.EncodeToString(schnorr.SerializePubKey(res.pub)),
 		)
-		nsec, _ := nostr.SecretKeyToNsec(sec)
+		nsec, _ := nostr.SecretKeyToNsec(res.sec)
 		s.Log("nostr:\n"+
 			"\tsecret: %s\n"+
 			"\tpublic: %s\n\n",
-			nsec, npub)
+			nsec, res.npub)
 	}
-	if e = s.Save(name, secBytes, npub); e != nil {
+	if e = s.Save(name, secBytes, res.npub); e != nil {
 		e = fmt.Errorf("error saving keys: %v", e)
 		return
 	}
@@ -75,39 +117,52 @@ func (s *Signr) Vanity(str, name string, where Position) (e error) {
 }
 
 func (s *Signr) mine(str string, where Position,
-	quit qu.C) (sec *secp.SecretKey, pub *secp.PublicKey,
-	npub string, counter int, e error) {
+	quit qu.C, resC chan Result, wg *sync.WaitGroup,
+	counter *atomic.Int64) {
 
+	wg.Add(1)
+	var r Result
+	var e error
 	found := false
+out:
 	for !found {
-		counter++
-		sec, pub, e = s.GenKeyPair()
-		if e != nil {
-			e = fmt.Errorf("error generating key: %s", e)
-			return
+		select {
+		case <-quit:
+			wg.Done()
+			if found {
+				// send back the result
+				resC <- r
+			}
+			break out
+		default:
 		}
-		npub, e = nostr.PublicKeyToNpub(pub)
+		counter.Inc()
+		r.sec, r.pub, e = s.GenKeyPair()
 		if e != nil {
-			s.Fatal("fatal error generating npub: %s\n", e)
+			s.Err("error generating key: '%v' worker stopping", e)
+			break out
 		}
-		// s.Log("%s\n", npub)
+		r.npub, e = nostr.PublicKeyToNpub(r.pub)
+		if e != nil {
+			s.Err("fatal error generating npub: %s\n", e)
+			break out
+		}
 		switch where {
 		case PositionBeginning:
-			if strings.HasPrefix(npub, prefix+str) {
+			if strings.HasPrefix(r.npub, prefix+str) {
 				found = true
+				quit.Q()
 			}
 		case PositionEnding:
-			if strings.HasSuffix(npub, str) {
+			if strings.HasSuffix(r.npub, str) {
 				found = true
+				quit.Q()
 			}
 		case PositionContains:
-			if strings.Contains(npub, str) {
+			if strings.Contains(r.npub, str) {
 				found = true
+				quit.Q()
 			}
 		}
-		if counter%1000000 == 0 {
-			s.Log("attempt %d\n", counter)
-		}
 	}
-	return
 }

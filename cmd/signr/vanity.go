@@ -3,8 +3,11 @@ package signr
 import (
 	"github.com/spf13/cobra"
 	"mleku.online/git/signr/pkg/signr"
+	"runtime"
 	"strings"
 )
+
+var Threads int
 
 var vanityCmd = &cobra.Command{
 	Use:   "vanity <string> <name> [begin|contain|end]",
@@ -47,12 +50,15 @@ If the final position spec is omitted, the search will look for the beginning.
 				where = signr.PositionEnding
 			}
 		}
-		if err = s.Vanity(str, keyName, where); err != nil {
+		if err = s.Vanity(str, keyName, where, Threads); err != nil {
 			s.Fatal("error: %s\n", err)
 		}
 	},
 }
 
 func init() {
+	vanityCmd.PersistentFlags().IntVarP(&Threads, "threads", "t",
+		runtime.NumCPU(),
+		"set the number of threads to mine for vanity key")
 	rootCmd.AddCommand(vanityCmd)
 }

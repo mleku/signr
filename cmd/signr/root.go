@@ -32,6 +32,8 @@ func Execute() {
 	}
 }
 
+var Verbose, Color bool
+
 func init() {
 
 	var err error
@@ -41,9 +43,9 @@ func init() {
 	if err != nil {
 		s.Fatal("fatal error: %s\n", err)
 	}
-	rootCmd.PersistentFlags().BoolVarP(&s.Verbose,
+	rootCmd.PersistentFlags().BoolVarP(&Verbose,
 		"verbose", "v", false, "prints more things")
-	rootCmd.PersistentFlags().BoolVarP(&s.Color,
+	rootCmd.PersistentFlags().BoolVarP(&Color,
 		"color", "c", false, "prints color things")
 	cobra.OnInitialize(initConfig(s))
 }
@@ -57,8 +59,10 @@ func initConfig(cfg *signr.Signr) func() {
 		// read in environment variables that match
 		viper.SetEnvPrefix(signr.AppName)
 		viper.AutomaticEnv()
+		s.Verbose.Store(Verbose)
+		s.Color.Store(Color)
 		// If a config file is found, read it in.
-		if err := viper.ReadInConfig(); err == nil && cfg.Verbose {
+		if err := viper.ReadInConfig(); err == nil && cfg.Verbose.Load() {
 			cfg.Log("Using config file: %s\n", viper.ConfigFileUsed())
 		}
 

@@ -138,11 +138,11 @@ func FormatSig(signingStrings []string, sig *schnorr.Signature) (str string,
 // Log prints if verbose is enabled, and adds some color if it is enabled.
 func (s *Signr) Log(format string, a ...interface{}) {
 
-	if !s.Verbose {
+	if !s.Verbose.Load() {
 		return
 	}
 	format = "> " + format
-	if s.Color {
+	if s.Color.Load() {
 		format = color.C256(214).Sprint(format)
 	}
 	_, _ = fmt.Fprintf(os.Stderr, format, a...)
@@ -151,7 +151,7 @@ func (s *Signr) Log(format string, a ...interface{}) {
 // Err prints an error message, adds some color if enabled.
 func (s *Signr) Err(format string, a ...interface{}) {
 
-	if s.Color {
+	if s.Color.Load() {
 		format = color.Red.Sprint(format)
 	}
 	_, _ = fmt.Fprintf(os.Stderr, format, a...)
@@ -161,7 +161,7 @@ func (s *Signr) Err(format string, a ...interface{}) {
 // pipe/redirection.
 func (s *Signr) Info(format string, a ...interface{}) {
 
-	if s.Color {
+	if s.Color.Load() {
 		format = color.Blue.Sprint(format)
 	}
 	_, _ = fmt.Fprintf(os.Stderr, format, a...)
@@ -174,7 +174,7 @@ func Newline() {
 // Fatal prints an error and then terminates the program.
 func (s *Signr) Fatal(format string, a ...interface{}) {
 
-	if s.Color {
+	if s.Color.Load() {
 		format = color.Red.Sprint("FATAL: ") + format
 	}
 	_, _ = fmt.Fprintf(os.Stderr, format, a...)

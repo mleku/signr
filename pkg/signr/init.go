@@ -2,6 +2,7 @@ package signr
 
 import (
 	"fmt"
+	"mleku.online/git/atomic"
 	"os"
 	"runtime"
 
@@ -13,8 +14,8 @@ type Signr struct {
 	DataDir       string
 	CfgFile       string
 	DefaultKey    string
-	Verbose       bool
-	Color         bool
+	Verbose       atomic.Bool
+	Color         atomic.Bool
 	PassEntryType int
 }
 

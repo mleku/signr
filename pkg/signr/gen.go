@@ -22,7 +22,7 @@ func (s *Signr) Generate(name string) (err error) {
 		err = fmt.Errorf("error generating npub: %s", err)
 		return
 	}
-	if s.Verbose {
+	if s.Verbose.Load() {
 		s.Log(
 			"generated key pair:\n"+
 				"\nhex:\n"+

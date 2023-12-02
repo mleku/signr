@@ -40,7 +40,7 @@ func (s *Signr) Import(secKey, name string) (err error) {
 		hex.EncodeToString(secBytes),
 		hex.EncodeToString(schnorr.SerializePubKey(pub)),
 	)
-	if s.Verbose {
+	if s.Verbose.Load() {
 		nsec, _ := nostr.SecretKeyToNsec(sec)
 		s.Err("nostr:\n"+
 			"\tsecret: %s\n"+
