@@ -125,13 +125,17 @@ func (s *Signr) mine(str string, where Position,
 	var e error
 	found := false
 out:
-	for !found {
+	for {
 		select {
 		case <-quit:
 			wg.Done()
 			if found {
 				// send back the result
+				s.Log("sending back result\n")
 				resC <- r
+				s.Log("sent\n")
+			} else {
+				s.Log("other thread found it\n")
 			}
 			break out
 		default:
@@ -151,16 +155,19 @@ out:
 		case PositionBeginning:
 			if strings.HasPrefix(r.npub, prefix+str) {
 				found = true
+				s.Info("found it %s %d attempts\n", r.npub, counter.Load())
 				quit.Q()
 			}
 		case PositionEnding:
 			if strings.HasSuffix(r.npub, str) {
 				found = true
+				s.Info("found it %s %d attempts\n", r.npub, counter.Load())
 				quit.Q()
 			}
 		case PositionContains:
 			if strings.Contains(r.npub, str) {
 				found = true
+				s.Info("found it %s %d attempts\n", r.npub, counter.Load())
 				quit.Q()
 			}
 		}
