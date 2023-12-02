@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"mleku.online/git/ec/schnorr"
+	"mleku.online/git/qu"
 	"mleku.online/git/signr/pkg/nostr"
 )
 
@@ -22,7 +23,7 @@ const (
 	PositionEnding
 )
 
-func (s *Signr) Vanity(str, name string, where Position) (err error) {
+func (s *Signr) Vanity(str, name string, where Position) (e error) {
 
 	// check the string has valid bech32 ciphers
 	for i := range str {
@@ -39,21 +40,55 @@ func (s *Signr) Vanity(str, name string, where Position) (err error) {
 		}
 	}
 
-	found := false
+	started := time.Now()
+
+	quit := qu.T()
 	var sec *secp.SecretKey
-	var pub *secp.PublicKey
 	var counter int
 	var npub string
-	started := time.Now()
+	var pub *secp.PublicKey
+	sec, pub, npub, counter, e = s.mine(str, where, quit)
+
+	s.Info("generated in %d attempts, taking %v\n", counter,
+		started.Sub(time.Now()))
+	secBytes := sec.Serialize()
+	if s.Verbose {
+		s.Log(
+			"generated key pair:\n"+
+				"\nhex:\n"+
+				"\tsecret: %s\n"+
+				"\tpublic: %s\n\n",
+			hex.EncodeToString(secBytes),
+			hex.EncodeToString(schnorr.SerializePubKey(pub)),
+		)
+		nsec, _ := nostr.SecretKeyToNsec(sec)
+		s.Log("nostr:\n"+
+			"\tsecret: %s\n"+
+			"\tpublic: %s\n\n",
+			nsec, npub)
+	}
+	if e = s.Save(name, secBytes, npub); e != nil {
+		e = fmt.Errorf("error saving keys: %v", e)
+		return
+	}
+	return
+}
+
+func (s *Signr) mine(str string, where Position,
+	quit qu.C) (sec *secp.SecretKey, pub *secp.PublicKey,
+	npub string, counter int, e error) {
+
+	found := false
 	for !found {
 		counter++
-		sec, pub, err = s.GenKeyPair()
-		if err != nil {
-			return fmt.Errorf("error generating key: %s", err)
+		sec, pub, e = s.GenKeyPair()
+		if e != nil {
+			e = fmt.Errorf("error generating key: %s", e)
+			return
 		}
-		npub, err = nostr.PublicKeyToNpub(pub)
-		if err != nil {
-			s.Fatal("fatal error generating npub: %s\n", err)
+		npub, e = nostr.PublicKeyToNpub(pub)
+		if e != nil {
+			s.Fatal("fatal error generating npub: %s\n", e)
 		}
 		// s.Log("%s\n", npub)
 		switch where {
@@ -73,28 +108,6 @@ func (s *Signr) Vanity(str, name string, where Position) (err error) {
 		if counter%1000000 == 0 {
 			s.Log("attempt %d\n", counter)
 		}
-	}
-	s.Info("generated in %d attempts, taking %v\n", counter,
-		started.Sub(time.Now()))
-	secBytes := sec.Serialize()
-	if s.Verbose {
-		s.Log(
-			"generated key pair:\n"+
-				"\nhex:\n"+
-				"\tsecret: %s\n"+
-				"\tpublic: %s\n\n",
-			hex.EncodeToString(secBytes),
-			hex.EncodeToString(schnorr.SerializePubKey(pub)),
-		)
-		nsec, _ := nostr.SecretKeyToNsec(sec)
-		s.Log("nostr:\n"+
-			"\tsecret: %s\n"+
-			"\tpublic: %s\n\n",
-			nsec, npub)
-	}
-	if err = s.Save(name, secBytes, npub); err != nil {
-		err = fmt.Errorf("error saving keys: %v", err)
-		return
 	}
 	return
 }

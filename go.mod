@@ -15,9 +15,11 @@ require (
 	mleku.online/git/base58 v1.0.0
 	mleku.online/git/bech32 v1.0.3
 	mleku.online/git/ec v1.0.3
+	mleku.online/git/qu v1.0.3
 )
 
 require (
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dchest/blake256 v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
@@ -46,4 +48,6 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	mleku.online/git/atomic v1.11.3 // indirect
+	mleku.online/git/log v1.0.4 // indirect
 )
